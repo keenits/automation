@@ -2,7 +2,7 @@ $DefPath = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\"
 
 Write-Output "Updating default start menu and taskbar items..."
     Get-ChildItem $DefPath -recurse | Remove-Item
-    $download = "https://github.com/keenits/PoSh/blob/a4338ca848e114e9b40cca9486a1ec662dfd1706/Automation/Files/LayoutModification.xml"
+    $download = "https://raw.githubusercontent.com/keenits/automation/main/files/LayoutModification.xml?token=AUWNC2JYRD42AAZTAJWVIOLBAPXCE"
     $output = $DefPath + "LayoutModification.xml"
     Invoke-RestMethod -Uri $download -OutFile $output
 Write-Output "Loading default profile reg hive..."
