@@ -1,13 +1,11 @@
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
-
-#Declare LocalUser Object
 $ObjLocalUser = $null
 
 #User to search for
 $usr1 = "@usr_1@"
 
-#Validate password
+#Securing password
 if ( "@pwd_1@" -ne ""){
     $secpwd1 = ConvertTo-SecureString "@pwd_1@" -AsPlainText -Force
     }
@@ -16,20 +14,17 @@ if ( "@pwd_1@" -ne ""){
         Exit
         }
 
-Try {
-    Write-Verbose "Searching for $($usr1) in the local Administrators group"
-    $ObjLocalUser = Get-LocalGroupMember -Group Administrators -Member $($usr1)
-	    Set-LocalUser -Name $($usr1) -Password $($secpwd1)
-            Write-Verbose "User $($usr1) already has admin permissions... Successfully reset password"
-            Exit
-    }
+Write-Verbose "Searching for $($usr1) on the local system..."
 
-Catch [Microsoft.PowerShell.Commands.PrincipalNotFoundException] {
-    "User $($usr1) was not found in the local Administrators group... Searching for $($usr1) on the local system" | Write-Warning
+Try {
+    $ObjLocalUser = Get-LocalGroupMember -Group Administrators -Member $($usr1)
+	Set-LocalUser -Name $($usr1) -Password $($secpwd1)
+        Write-Verbose "User $($usr1) was found and is a member of the local Administrators group... Successfully reset password"
+        Exit
     }
 
 Catch {
-    "An unspecifed error occured" | Write-Error
+    "An unspecifed error occured, exiting script" | Write-Error
     Exit # Stop Powershell! 
     }
 
@@ -38,22 +33,22 @@ If (!$ObjLocalUser) {
         $ObjLocalUser = Get-LocalUser $($usr1)
             Set-LocalUser -Name $($usr1) -Password $($secpwd1)
             Add-LocalGroupMember -Group Administrators -Member $($usr1)
-                Write-Verbose "User $($usr1) was found... Successfully reset password and added $($usr1) account the local Administrators group"
+                Write-Verbose "User $($usr1) was found but is not yet a member of the local Administrators group... Successfully reset password and added to the local Administrators group"
         Exit
         }
 
 	    Catch [Microsoft.PowerShell.Commands.UserNotFoundException] {
-	        "User $($usr1) was not found... Creating and adding to the local Administrators group" | Write-Warning
+	        "User $($usr1) was not found!" | Write-Warning
         }
 
 	    Catch {
-	        "An unspecifed error occured" | Write-Error
+	        "An unspecifed error occured, exiting script" | Write-Error
 	    Exit # Stop Powershell! 
         }
 
 	If (!$ObjLocalUser) {
 	    New-LocalUser -AccountNeverExpires:$true -Password $($secpwd1) -Name $($usr1) -PasswordNeverExpires | Add-LocalGroupMember -Group Administrators
-            Write-Verbose "Successfully created $($usr1) and added account to the local Administrators group"
+            Write-Verbose "Successfully created $($usr1) and added to the local Administrators group"
     Exit
     }
 }
