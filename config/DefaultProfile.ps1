@@ -4,6 +4,7 @@ $ErrorActionPreference = 'stop'
 Start-Transcript $ENV:ProgramData\OSDeploy\Logs\DefaultProfile-transcript.txt
 Write-Output "**********************"
 
+
 #!Start Layout
     Write-Output "Updating default start menu and taskbar items..."
     $path = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\"
@@ -97,5 +98,5 @@ Write-Output "**********************"
     Write-Output "Unloading default profile reg hive..."
         reg unload HKLM\DEFAULT
 
-#Transcript End
-    Stop-Transcript
+
+Stop-Transcript
