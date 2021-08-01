@@ -2,6 +2,11 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
 $ObjLocalUser = $null
 
+
+Start-Transcript $ENV:ProgramData\OSDeploy\Logs\RemoveBloatware-transcript.txt
+Write-Output "**********************"
+
+
 #User to search for
 $usr2 = "@usr_2@"
 
@@ -48,3 +53,6 @@ If (!$ObjLocalUser) {
     Exit
     }
 }
+
+
+Stop-Transcript
