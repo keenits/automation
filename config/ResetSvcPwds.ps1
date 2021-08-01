@@ -16,6 +16,7 @@ if ( "@pwd@" -ne ""){
     }
     else{
         Write-Output "No password provided, exiting script"
+	Stop-Transcript
         Exit
         }
 
