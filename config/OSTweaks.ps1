@@ -1,6 +1,13 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
-    Write-Output "Let the tweaking begin"
+    If ("$ENV:ProgramData\OSDeploy\Logs"){
+        Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
+    }
+    Else
+    {
+        New-Item -ItemType Directory $ENV:ProgramData\OSDeploy\Logs
+        Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
+    }
     Write-Output "**********************"
 
 #Essential Tweaks
@@ -162,36 +169,34 @@ $ErrorActionPreference = 'SilentlyContinue'
     Write-Output "Disabling LMHOSTS Lookup..."
     Set-ItemProperty -path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" EnableLMHOSTS -value 0
 
-    Write-Output "Configuring default app associations..."
-    $download = "https://raw.githubusercontent.com/keenits/PoSh/main/Automation/Files/defaultassociations.xml"
-    $output = "C:\Windows\System32\defaultassociations.xml"
-    Invoke-RestMethod -Uri $download -OutFile $output
-    Dism /online /import-defaultappassociations:C:\Windows\System32\defaultassociations.xml
-
-    Write-Output "Deleting desktop shortcuts"
+    Write-Output "Deleting desktop shortcuts..."
     Try
     {
-        Remove-Item 'C:\Users\Public\Desktop\Acrobat Reader DC.lnk'
-        Remove-Item 'C:\Users\Public\Desktop\Google Chrome.lnk'
-        Remove-Item 'C:\Users\Public\Desktop\Microsoft Edge.lnk'
+        Remove-Item 'C:\Users\Public\Desktop\Acrobat Reader DC.lnk' -Force
+        Remove-Item 'C:\Users\Public\Desktop\Google Chrome.lnk' -Force
+        Remove-Item 'C:\Users\Public\Desktop\Microsoft Edge.lnk' -Force
     }
     Catch
     {}
 
 #    schtasks /change /tn "\Microsoft\Windows\Workplace Join\Automatic-Device-Join" /disable
 
-#Function - Force NetBIOS over TCP/IP
-    Function SetTCPIP {$adapters=(gwmi win32_networkadapterconfiguration )
-       Foreach ($adapter in $adapters){
-          $adapter.settcpipnetbios(1)
+    Function SetTCPIP {
+        $adapters=(gwmi win32_networkadapterconfiguration )
+            Foreach ($adapter in $adapters){
+                $adapter.settcpipnetbios(1)
     }}
-
-#Function - Set CD/DVD Drive to X:
-    Function ReletterDrive {Get-WmiObject -Class Win32_volume -Filter 'DriveType=5' | Select-Object -First 1 | Set-WmiInstance -Arguments @{DriveLetter='X:'}}
-
-    Write-Output "Executing function calls..."
+    Write-Output "Forcing NetBIOS over TCP/IP..."
     SetTCPIP | Out-Null
+
+    Function ReletterDrive {Get-WmiObject -Class Win32_volume -Filter 'DriveType=5' | Select-Object -First 1 | Set-WmiInstance -Arguments @{DriveLetter='X:'}}
+    Write-Output "Setting CD/DVD Drive to X:..."
     ReletterDrive | Out-Null
 
-    Write-Output "***********************************"
-    Write-Output "Successfully implemented all tweaks"
+    Write-Output "Configuring default app associations..."
+    $download = "https://raw.githubusercontent.com/keenits/automation/main/files/defaultassociations.xml"
+    $output = "C:\Windows\System32\defaultassociations.xml"
+    Invoke-RestMethod -Uri $download -OutFile $output
+    Dism /online /import-defaultappassociations:C:\Windows\System32\defaultassociations.xml
+    
+    Stop-Transcript
