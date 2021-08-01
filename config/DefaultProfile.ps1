@@ -1,12 +1,25 @@
-$DefPath = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\"
+$ErrorActionPreference = 'stop'
+
+    If ("$ENV:ProgramData\OSDeploy\Logs"){
+        Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
+    }
+    Else
+    {
+        New-Item -ItemType Directory $ENV:ProgramData\OSDeploy\Logs
+        Start-Transcript $ENV:ProgramData\OSDeploy\Logs\DefaultProfile-transcript.txt
+    }
+    Write-Output "**********************"
 
 Write-Output "Updating default start menu and taskbar items..."
-    Get-ChildItem $DefPath -recurse | Remove-Item
-    $download = "https://raw.githubusercontent.com/keenits/automation/main/files/LayoutModification.xml?token=AUWNC2JYRD42AAZTAJWVIOLBAPXCE"
-    $output = $DefPath + "LayoutModification.xml"
+    $path = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\"
+    $download = "https://raw.githubusercontent.com/keenits/automation/main/config/DefaultProfile.ps1"
+    $output = $path + "LayoutModification.xml"
+    Get-ChildItem $path -Recurse | Remove-Item -Force
     Invoke-RestMethod -Uri $download -OutFile $output
+
 Write-Output "Loading default profile reg hive..."
     reg load HKLM\DEFAULT c:\users\default\ntuser.dat
+
 Write-Output "Configuring browser settings..."
     reg add "HKLM\DEFAULT\Software\Policies\Microsoft\MicrosoftEdge\Main" /v "FormSuggest Passwords" /t REG_SZ /d - /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Internet Explorer\Main" /v "Start Page" /t REG_SZ /d "https://www.google.com/" /f
@@ -18,9 +31,10 @@ Write-Output "Disabling Feedback..."
 Write-Output "Disabling Application suggestions..."
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "ContentDeliveryAllowed" /t REG_DWORD /d 0 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "OemPreInstalledAppsEnabled" /t REG_DWORD /d 0 /f
-    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "PreIntalledAppsEnabled" /t REG_DWORD /d 0 /f
-    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "PreInstalledApsEverEnabled" /t REG_DWORD /d 0 /f
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "PreInstalledAppsEnabled" /t REG_DWORD /d 0 /f
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "PreInstalledAppsEverEnabled" /t REG_DWORD /d 0 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SilentInstalledAppsEnabled" /t REG_DWORD /d 0 /f
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-310093Enabled" /t REG_DWORD /d 0 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338387Enabled" /t REG_DWORD /d 0 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338388Enabled" /t REG_DWORD /d 0 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338389Enabled"/t REG_DWORD /d 0 /f
@@ -49,6 +63,9 @@ Write-Output "Cleaning up the taskbar..."
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v HideSCAVolume /t REG_DWORD /d 1 /f
 Write-Output "Setting taskbar search icon..."
     reg add "HKLM\DEFAULT\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f
+
+Write-Output "Disabling some tracking feature..."
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f
 Write-Output "Disabling Tailored Experiences..."
     reg add "HKLM\DEFAULT\Software\Policies\Microsoft\Windows\CloudContent" /v "DisableTailoredExperiencesWithDiagnosticData" /t REG_DWORD /d 1 /f
 Write-Output "Configuring desktop settings..."
@@ -65,8 +82,10 @@ Write-Output "Configuring console settings..."
     reg add "HKLM\DEFAULT\Console\%SystemRoot%_System32_WindowsPowerShell_v1.0_powershell.exe" /v LineWrap /t REG_DWORD /d 1 /f
     reg add "HKLM\DEFAULT\Console\%SystemRoot%_System32_WindowsPowerShell_v1.0_powershell.exe" /v ScreenBuffer /t REG_DWORD /d 589889686 /f
     reg add "HKLM\DEFAULT\Console\%SystemRoot%_System32_WindowsPowerShell_v1.0_powershell.exe" /v WindowSize /t REG_DWORD  /d 4587670 /f
-Write-Output "Unloading default profile reg hive..."
-    reg unload HKLM\DEFAULT
-
 #Write-Output "Disabling Storage Sense..."
 #    reg delete "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy"
+
+Write-Output "Unloading default profile reg hive..."
+     reg unload HKLM\DEFAULT
+
+Stop-Transcript
