@@ -62,9 +62,7 @@ $ErrorActionPreference = 'SilentlyContinue'
     }
     Catch{}
 #Drive letters
-    Function ReletterDrive {Get-WmiObject -Class Win32_volume -Filter 'DriveType=5' | Select-Object -First 1 | Set-WmiInstance -Arguments @{DriveLetter='X:'}}
-    Write-Output "Setting CD/DVD Drive to X:..."
-    ReletterDrive | Out-Null
+    Get-WmiObject -Class Win32_volume -Filter 'DriveType=5' | Select-Object -First 1 | Set-WmiInstance -Arguments @{DriveLetter="Z:"} | Out-Null
 #Edge browser
     Write-Output "Configuring Edge settings..."
     reg add "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /v CreateDesktopShortcutDefault /t REG_DWORD /d 0 /f | Out-Null
