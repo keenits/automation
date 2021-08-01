@@ -179,8 +179,6 @@ $ErrorActionPreference = 'SilentlyContinue'
     Catch
     {}
 
-#    schtasks /change /tn "\Microsoft\Windows\Workplace Join\Automatic-Device-Join" /disable
-
     Function SetTCPIP {
         $adapters=(gwmi win32_networkadapterconfiguration )
             Foreach ($adapter in $adapters){
@@ -192,7 +190,34 @@ $ErrorActionPreference = 'SilentlyContinue'
     Function ReletterDrive {Get-WmiObject -Class Win32_volume -Filter 'DriveType=5' | Select-Object -First 1 | Set-WmiInstance -Arguments @{DriveLetter='X:'}}
     Write-Output "Setting CD/DVD Drive to X:..."
     ReletterDrive | Out-Null
+    
+#OneDrive
+    Write-Output "Disabling OneDrive..."
+    If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive")) {
+        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" | Out-Null
+    }
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Type DWord -Value 1
+    Stop-Process -Name "OneDrive"
+    Start-Sleep -s 2
+    $onedrive = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
+    If (!(Test-Path $onedrive)) {
+        $onedrive = "$env:SYSTEMROOT\System32\OneDriveSetup.exe"
+    }
+    Start-Process $onedrive "/uninstall" -NoNewWindow -Wait
+    Start-Sleep -s 2
+    Stop-Process -Name "explorer"
+    Start-Sleep -s 2
+    Remove-Item -Path "$env:USERPROFILE\OneDrive" -Force -Recurse
+    Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\OneDrive" -Force -Recurse
+    Remove-Item -Path "$env:PROGRAMDATA\Microsoft OneDrive" -Force -Recurse
+    Remove-Item -Path "$env:SYSTEMDRIVE\OneDriveTemp" -Force -Recurse
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+    Remove-Item -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Recurse
+    Remove-Item -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Recurse
 
+#Set default app associations
     Write-Output "Configuring default app associations..."
     $download = "https://raw.githubusercontent.com/keenits/automation/main/files/defaultassociations.xml"
     $output = "C:\Windows\System32\defaultassociations.xml"
