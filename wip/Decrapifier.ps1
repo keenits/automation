@@ -63,21 +63,21 @@
 
 [cmdletbinding(DefaultParameterSetName="Decrapifier")]
 param (
-	[switch]$AllApps, 
+    [switch]$AllApps,
     [switch]$LeaveTasks,
     [switch]$LeaveServices,
-	[switch]$AppAccess,
-	[switch]$OneDrive,
-	[switch]$Xbox,
-	[switch]$Tablet,
-	[switch]$Cortana,
+    [switch]$AppAccess,
+    [switch]$OneDrive,
+    [switch]$Xbox,
+    [switch]$Tablet,
+    [switch]$Cortana,
     [switch]$ClearStart,
-	[switch]$NoLog,
+    [switch]$NoLog,
     [Parameter(ParameterSetName="AppsOnly")]
-    [switch]$AppsOnly,
+        [switch]$AppsOnly,
     [Parameter(ParameterSetName="SettingsOnly")]
-    [switch]$SettingsOnly
-	)
+	[switch]$SettingsOnly
+)
 
 #------USER EDITABLE VARIABLES - change these to your tastes!------
 
@@ -192,7 +192,7 @@ Function DisableServices {
 #Registry change functions
 #Load default user hive
 Function loaddefaulthive {
-	$matjazp72 = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList' Default).Default
+    $matjazp72 = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList' Default).Default
     reg load "$reglocation" $matjazp72\ntuser.dat
 }
 
@@ -411,7 +411,7 @@ Function RegSetMachine {
     #/Cloud Content			
     #Turn off Consumer Experiences	- Enterprise only (for Pro, HKCU settings and start menu cleanup achieve same result)		
     Reg Add	"HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /T REG_DWORD /V "DisableWindowsConsumerFeatures" /D 1 /F
-	#Turn off all spotlight features	
+    #Turn off all spotlight features	
     #Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /T REG_DWORD /V "DisableWindowsSpotlightFeatures" /D 1 /F  
 
     #/Data Collection and Preview Builds			
@@ -434,19 +434,19 @@ Function RegSetMachine {
     #Disallow users to override this
     #Reg Add	"HKLM\SOFTWARE\Policies\Microsoft\Windows\SettingSync" /T REG_DWORD /V "DisableSettingSyncUserOverride" /D 1 /F
 	
-	#Add "Run as different user" to context menu
-	Reg Add	"HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /T REG_DWORD /V "ShowRunasDifferentuserinStart" /D 1 /F
+    #Add "Run as different user" to context menu
+    Reg Add	"HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /T REG_DWORD /V "ShowRunasDifferentuserinStart" /D 1 /F
 	
-	#Disable "Meet Now" taskbar button
-	Reg Add	"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /T REG_DWORD /V "HideSCAMeetNow" /D 1 /F
+    #Disable "Meet Now" taskbar button
+    Reg Add	"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /T REG_DWORD /V "HideSCAMeetNow" /D 1 /F
 	
-	#!!!None of these effective anymore in 1803!!! Now handled by HKCU settings
+    #!!!None of these effective anymore in 1803!!! Now handled by HKCU settings
     #Disallow web search from desktop search			
     #Reg Add	"HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /T REG_DWORD /V "DisableWebSearch" /D 1 /F
     #Don't search the web or display web results in search			
     #Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /T REG_DWORD /V "ConnectedSearchUseWeb" /D 0 /F
-	#Don't allow search to use location
-	#Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /T REG_DWORD /V "AllowSearchToUseLocation" /D 0 /F
+    #Don't allow search to use location
+    #Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /T REG_DWORD /V "AllowSearchToUseLocation" /D 0 /F
 
     #/Windows Update			
     #Turn off featured SOFTWARE notifications through Windows Update
@@ -456,19 +456,19 @@ Function RegSetMachine {
     #Delivery Optimization settings - sets to 1 for LAN only, change to 0 for off
     Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /T REG_DWORD /V "DownloadMode" /D 1 /F
     Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /T REG_DWORD /V "DODownloadMode" /D 1 /F
-	Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings" /T REG_DWORD /V "DownloadMode" /D 1 /F
+    Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings" /T REG_DWORD /V "DownloadMode" /D 1 /F
 	
     #Disabling advertising info and device metadata collection for this machine
     Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /T REG_DWORD /V "Enabled" /D 0 /F
     Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata" /V "PreventDeviceMetadataFromNetwork" /T REG_DWORD /D 1 /F
 
-	#Disable CEIP. GP setting at: Computer Config\Admin Templates\System\Internet Communication Managemen\Internet Communication settings
+    #Disable CEIP. GP setting at: Computer Config\Admin Templates\System\Internet Communication Managemen\Internet Communication settings
     Reg Add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /T REG_DWORD /V "CEIPEnable" /D 0 /F
 	
-	#Turn off automatic download/install of store app updates	
+    #Turn off automatic download/install of store app updates	
     #Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate" /T REG_DWORD /V "AutoDownload" /D 2 /F	
 	
-	#Prevent using sign-in info to automatically finish setting up after an update
+    #Prevent using sign-in info to automatically finish setting up after an update
     Reg Add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /T REG_DWORD /V "ARSOUserConsent" /D 0 /F
 	
     #Prevent apps on other devices from opening apps on this one - disables phone pairing
@@ -477,17 +477,17 @@ Function RegSetMachine {
     #Enable diagnostic data viewer
     Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack\EventTranscriptKey" /T REG_DWORD /V "EnableEventTranscript" /D 1 /F
 	
-	#Disable Edge desktop shortcut
-	Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /T REG_DWORD /V "DisableEdgeDesktopShortcutCreation" /D 1 /F
+    #Disable Edge desktop shortcut
+    Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /T REG_DWORD /V "DisableEdgeDesktopShortcutCreation" /D 1 /F
 	
-	#Filter web content through smartscreen. Left enabled by default.
+    #Filter web content through smartscreen. Left enabled by default.
     #Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /T REG_DWORD /V "EnableWebContentEvaluation" /D 0 /F
 
-	#--Optional Machine Settings--
+    #--Optional Machine Settings--
 	
-	#Disable Cortana - use -Cortana to leave it on
-	If ($Cortana){
-}	 Else{
+    #Disable Cortana - use -Cortana to leave it on
+    If ($Cortana){
+}    Else {
     #Cortana local GP - Computer Config\Admin Templates\Windows Components\Search			
     #Disallow Cortana			
     Reg Add	"HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /T REG_DWORD /V "AllowCortana" /D 0 /F
@@ -495,31 +495,31 @@ Function RegSetMachine {
     #Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /T REG_DWORD /V "AllowCortanaAboveLock" /D 0 /F
 }
 
-	#Tablet Settings - use -Tablet switch to leave these on
-	If ($Tablet) {
-}	 Else {
-		#Turn off location - global
-		Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location" /T REG_SZ /V "Value" /D Deny /F
+    #Tablet Settings - use -Tablet switch to leave these on
+    If ($Tablet) {
+}    Else {
+	#Turn off location - global
+	Reg Add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location" /T REG_SZ /V "Value" /D Deny /F
 }
 	
-	#Game settings - use -Xbox to leave these on
-	If ($Xbox) {
-}	 Else {
-		#Disable Game Monitoring Service
-		Reg Add "HKLM\SYSTEM\CurrentControlSet\Services\xbgm" /T REG_DWORD /V "Start" /D 4 /F
-		#GameDVR local GP - Computer Config\Admin Templates\Windows Components\Windows Game Recording and Broadcasting
-		Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /T REG_DWORD /V "AllowGameDVR" /D 0 /F
+    #Game settings - use -Xbox to leave these on
+    If ($Xbox) {
+}    Else {
+	#Disable Game Monitoring Service
+	Reg Add "HKLM\SYSTEM\CurrentControlSet\Services\xbgm" /T REG_DWORD /V "Start" /D 4 /F
+	#GameDVR local GP - Computer Config\Admin Templates\Windows Components\Windows Game Recording and Broadcasting
+	Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /T REG_DWORD /V "AllowGameDVR" /D 0 /F
 }
 
-	#OneDrive settings - use -OneDrive switch to leave these on
-	If ($OneDrive) {
-}	 Else {
-		#Prevent usage of OneDrive local GP - Computer Config\Admin Templates\Windows Components\OneDrive	
-		Reg Add	"HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" /T REG_DWORD /V "DisableFileSyncNGSC" /D 1 /F
-		Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" /T REG_DWORD /V "DisableFileSync" /D 1 /F
-		#Remove OneDrive from File Explorer
-		Reg Add "HKCR\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /T REG_DWORD /V "System.IsPinnedToNameSpaceTree" /D 0 /F
-		Reg Add "HKCR\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /T REG_DWORD /V "System.IsPinnedToNameSpaceTree" /D 0 /F
+    #OneDrive settings - use -OneDrive switch to leave these on
+    If ($OneDrive) {
+}    Else {
+	#Prevent usage of OneDrive local GP - Computer Config\Admin Templates\Windows Components\OneDrive	
+	Reg Add	"HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" /T REG_DWORD /V "DisableFileSyncNGSC" /D 1 /F
+	Reg Add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" /T REG_DWORD /V "DisableFileSync" /D 1 /F
+	#Remove OneDrive from File Explorer
+	Reg Add "HKCR\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /T REG_DWORD /V "System.IsPinnedToNameSpaceTree" /D 0 /F
+	Reg Add "HKCR\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /T REG_DWORD /V "System.IsPinnedToNameSpaceTree" /D 0 /F
 }
 	
 #End machine registry settings
@@ -529,9 +529,9 @@ Function RegSetMachine {
 #Clean up the default start menu    
 Function ClearStartMenu {
     If ($ClearStart) {
-		Write-Host "***Setting empty start menu for new profiles...***"
+	Write-Host "***Setting empty start menu for new profiles...***"
 #Don't edit this. Creates empty start menu if -ClearStart is used.
-        $StartLayoutStr = @"
+$StartLayoutStr = @"
 <LayoutModificationTemplate Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification" xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout">
   <LayoutOptions StartTileGroupCellWidth="6" />
   <DefaultLayoutOverride>
@@ -542,13 +542,12 @@ Function ClearStartMenu {
   </DefaultLayoutOverride>
   </LayoutModificationTemplate>
 "@
-	    add-content $Env:TEMP\startlayout.xml $StartLayoutStr
-        import-startlayout -layoutpath $Env:TEMP\startlayout.xml -mountpath $Env:SYSTEMDRIVE\
-        remove-item $Env:TEMP\startlayout.xml
-}    Else {        
-		Write-Host "***Setting clean start menu for new profiles...***"
-#Custom start layout XML near the top of the script.
-
+    add-content $Env:TEMP\startlayout.xml $StartLayoutStr
+     import-startlayout -layoutpath $Env:TEMP\startlayout.xml -mountpath $Env:SYSTEMDRIVE\
+     remove-item $Env:TEMP\startlayout.xml
+}    Else {       
+	Write-Host "***Setting clean start menu for new profiles...***"
+        #Custom start layout XML near the top of the script.
         add-content $Env:TEMP\startlayout.xml $StartLayoutStr
         import-startlayout -layoutpath $Env:TEMP\startlayout.xml -mountpath $Env:SYSTEMDRIVE\
         remove-item $Env:TEMP\startlayout.xml
@@ -559,7 +558,7 @@ Function ClearStartMenu {
 #Goodbye Message Function
 Function Goodbye {
     Write-Host "*******Decrapification complete.*******"
-	Write-Host "*******Remember to set your execution policy back!  Set-Executionpolicy restricted is the Windows 10 default.*******"
+    Write-Host "*******Remember to set your execution policy back!  Set-Executionpolicy restricted is the Windows 10 default.*******"
     Write-Host "*******Reboot your computer now!*******"     
 }
 
