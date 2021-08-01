@@ -34,7 +34,7 @@ $ErrorActionPreference = 'SilentlyContinue'
 #BIOS Time
     Write-Output "Setting BIOS time to UTC..."
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" -Name "RealTimeIsUniversal" -Type DWord -Value 1
-    if ((Get-WmiObject -Class Win32_ComputerSystem).PCSystemType -ne 2)
+    If ((Get-WmiObject -Class Win32_ComputerSystem).PCSystemType -ne 2)
     {Write-Output "Disabling Hibernation..."
     Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernteEnabled" -Type Dword -Value 0
     If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
@@ -68,8 +68,7 @@ $ErrorActionPreference = 'SilentlyContinue'
         Remove-Item 'C:\Users\Public\Desktop\Google Chrome.lnk' -Force
         Remove-Item 'C:\Users\Public\Desktop\Microsoft Edge.lnk' -Force
     }
-    Catch
-    {}
+    Catch{}
 #Drive letters
     Function ReletterDrive {Get-WmiObject -Class Win32_volume -Filter 'DriveType=5' | Select-Object -First 1 | Set-WmiInstance -Arguments @{DriveLetter='X:'}}
     Write-Output "Setting CD/DVD Drive to X:..."
