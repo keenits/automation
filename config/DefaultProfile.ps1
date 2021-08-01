@@ -1,13 +1,7 @@
 $ErrorActionPreference = 'stop'
 
-    If ("$ENV:ProgramData\OSDeploy\Logs"){
-        Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
-    }
-    Else
-    {
-        New-Item -ItemType Directory $ENV:ProgramData\OSDeploy\Logs
-        Start-Transcript $ENV:ProgramData\OSDeploy\Logs\DefaultProfile-transcript.txt
-    }
+#!Start transcript
+    Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
     Write-Output "**********************"
 
 Write-Output "Updating default start menu and taskbar items..."
