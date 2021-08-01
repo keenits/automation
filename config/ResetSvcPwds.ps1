@@ -8,23 +8,23 @@ Write-Output "**********************"
 
 
 #User to search for
-$usr2 = "@usr_2@"
+$usr = "@usr@"
 
 #Securing password
-if ( "@pwd_2@" -ne ""){
-    $secpwd2 = ConvertTo-SecureString "@pwd_2@" -AsPlainText -Force
+if ( "@pwd@" -ne ""){
+    $secpwd = ConvertTo-SecureString "@pwd@" -AsPlainText -Force
     }
     else{
         Write-Error "No password provided, exiting script"
         Exit
         }
 
-Write-Verbose "Searching for $($usr2) on the local system..."
+Write-Verbose "Searching for $($usr) on the local system..."
 
 Try {
-    $ObjLocalUser = Get-LocalGroupMember -Group Administrators -Member $($usr2)
-	Set-LocalUser -Name $($usr2) -Password $($secpwd2)
-        Write-Verbose "User $($usr2) was found and is a member of the local Administrators group... Successfully reset password"
+    $ObjLocalUser = Get-LocalGroupMember -Group Administrators -Member $($usr)
+	Set-LocalUser -Name $($usr) -Password $($secpwd)
+        Write-Verbose "User $($usr) was found and is a member of the local Administrators group... Successfully reset password"
         Exit
     }
 
@@ -35,10 +35,10 @@ Try {
 
 If (!$ObjLocalUser) {
     Try {
-        $ObjLocalUser = Get-LocalUser $($usr2)
-            Set-LocalUser -Name $($usr2) -Password $($secpwd2)
-            Add-LocalGroupMember -Group Administrators -Member $($usr2)
-                Write-Verbose "User $($usr2) was found but is not yet a member of the local Administrators group... Successfully reset password and added to the local Administrators group"
+        $ObjLocalUser = Get-LocalUser $($usr)
+            Set-LocalUser -Name $($usr) -Password $($secpwd)
+            Add-LocalGroupMember -Group Administrators -Member $($usr)
+                Write-Verbose "User $($usr) was found but is not yet a member of the local Administrators group... Successfully reset password and added to the local Administrators group"
         Exit
         }
 
@@ -48,8 +48,8 @@ If (!$ObjLocalUser) {
         }
 
 	If (!$ObjLocalUser) {
-	    New-LocalUser -AccountNeverExpires:$true -Password $($secpwd2) -Name $($usr2) -PasswordNeverExpires | Add-LocalGroupMember -Group Administrators
-            Write-Verbose "Successfully created $($usr2) and added to the local Administrators group"
+	    New-LocalUser -AccountNeverExpires:$true -Password $($secpwd) -Name $($usr) -PasswordNeverExpires | Add-LocalGroupMember -Group Administrators
+            Write-Verbose "Successfully created $($usr) and added to the local Administrators group"
     Exit
     }
 }
