@@ -28,32 +28,33 @@ Try {
         Exit
     }
 
+    Catch [Microsoft.PowerShell.Commands.PrincipalNotFoundException] {
+        If (!$ObjLocalUser) {
+            Try {
+                $ObjLocalUser = Get-LocalUser $($usr)
+                    Set-LocalUser -Name $($usr) -Password $($secpwd)
+                    Add-LocalGroupMember -Group Administrators -Member $($usr)
+                        Write-Verbose "User $($usr) was found but not a member of the local Administrators group... password reset and added to Administrators group, exiting script"
+                Exit
+                }
+
+                Catch [Microsoft.PowerShell.Commands.UserNotFoundException] {
+        	        If (!$ObjLocalUser) {
+                        New-LocalUser -AccountNeverExpires:$true -Password $($secpwd) -Name $($usr) -PasswordNeverExpires | Add-LocalGroupMember -Group Administrators
+                            Write-Verbose "User $($usr) was not found... created account and added to Administrators group, exiting script"
+                    }
+                }
+        
+                Catch {
+                    "An unspecifed error occured, exiting script" | Write-Error
+                    Exit # Stop Powershell!
+                } 
+            }
+    }
     Catch {
         "An unspecifed error occured, exiting script" | Write-Error
         Exit # Stop Powershell! 
     }
-
-If (!$ObjLocalUser) {
-    Try {
-        $ObjLocalUser = Get-LocalUser $($usr)
-            Set-LocalUser -Name $($usr) -Password $($secpwd)
-            Add-LocalGroupMember -Group Administrators -Member $($usr)
-                Write-Verbose "User $($usr) was found but not a member of the local Administrators group... password reset and added to Administrators group, exiting script"
-        Exit
-        }
-
-        Catch {
-	    "An unspecifed error occured, exiting script" | Write-Error
-	    Exit # Stop Powershell! 
-        }
-
-	If (!$ObjLocalUser) {
-	    New-LocalUser -AccountNeverExpires:$true -Password $($secpwd) -Name $($usr) -PasswordNeverExpires | Add-LocalGroupMember -Group Administrators
-            Write-Verbose "User $($usr) was not found... created account and added to Administrators group, exiting script"
-
-    Exit
-    }
-}
 
 
 Stop-Transcript
