@@ -15,7 +15,7 @@ if ( "@pwd@" -ne ""){
     $secpwd = ConvertTo-SecureString "@pwd@" -AsPlainText -Force
     }
     else{
-        Write-Error "No password provided, exiting script"
+        Write-Output "No password provided, exiting script"
         Exit
         }
 
