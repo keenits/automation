@@ -24,7 +24,7 @@ Write-Verbose "Searching for $($usr) on the local system..."
 Try {
     $ObjLocalUser = Get-LocalGroupMember -Group Administrators -Member $($usr)
 	Set-LocalUser -Name $($usr) -Password $($secpwd)
-        Write-Verbose "User $($usr) was found and is a member of the local Administrators group... Successfully reset password"
+        Write-Verbose "User $($usr) was found as a member of the local Administrators group... password reset, exiting script"
         Exit
     }
 
@@ -38,7 +38,7 @@ If (!$ObjLocalUser) {
         $ObjLocalUser = Get-LocalUser $($usr)
             Set-LocalUser -Name $($usr) -Password $($secpwd)
             Add-LocalGroupMember -Group Administrators -Member $($usr)
-                Write-Verbose "User $($usr) was found but is not yet a member of the local Administrators group... Successfully reset password and added to the local Administrators group"
+                Write-Verbose "User $($usr) was found but not a member of the local Administrators group... password reset and added to Administrators group, exiting script"
         Exit
         }
 
@@ -49,7 +49,8 @@ If (!$ObjLocalUser) {
 
 	If (!$ObjLocalUser) {
 	    New-LocalUser -AccountNeverExpires:$true -Password $($secpwd) -Name $($usr) -PasswordNeverExpires | Add-LocalGroupMember -Group Administrators
-            Write-Verbose "Successfully created $($usr) and added to the local Administrators group"
+            Write-Verbose "User $($usr) was not found... created account and added to Administrators group, exiting script"
+
     Exit
     }
 }
