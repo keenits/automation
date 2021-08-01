@@ -1,9 +1,13 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
+
+Start-Transcript $ENV:ProgramData\OSDeploy\Logs\RemoveBloatware-transcript.txt
+Write-Output "**********************"
+
 Write-Output "Removing Most Provisioned Apps - Keep Basic Tools"
 Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -notlike "*windows*"} | Where-Object {$_.PackageName -notlike "*store*"} | Remove-AppxProvisionedPackage -Online
 Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like "*feedbackhub*"} | Where-Object {$_.PackageName -like "*feedbackhub*"} | Remove-AppxProvisionedPackage -Online
-Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like "*communicationsapps*"} | Where-Object {$_.PackageName -like "*feedbackhub*"} | Remove-AppxProvisionedPackage -Online
+Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like "*communicationsapps*"} | Where-Object {$_.PackageName -like "*communicationsapps*"} | Remove-AppxProvisionedPackage -Online
 
 
 Write-Output "Removing Most Apps - Keep Basic Tools"
