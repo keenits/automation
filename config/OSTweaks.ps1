@@ -1,14 +1,7 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
-#Transcript
-    If ("$ENV:ProgramData\OSDeploy\Logs"){
-        Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
-    }
-    Else
-    {
-        New-Item -ItemType Directory $ENV:ProgramData\OSDeploy\Logs
-        Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
-    }
+#!Start transcript
+    Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
     Write-Output "**********************"
 
 #3D objects
