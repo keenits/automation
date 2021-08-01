@@ -25,7 +25,6 @@ Try {
     $ObjLocalUser = Get-LocalGroupMember -Group Administrators -Member $($usr)
 	Set-LocalUser -Name $($usr) -Password $($secpwd)
         Write-Verbose "User $($usr) was found as a member of the local Administrators group... password reset, exiting script"
-        Exit
     }
 
     Catch [Microsoft.PowerShell.Commands.PrincipalNotFoundException] {
@@ -35,7 +34,6 @@ Try {
                     Set-LocalUser -Name $($usr) -Password $($secpwd)
                     Add-LocalGroupMember -Group Administrators -Member $($usr)
                         Write-Verbose "User $($usr) was found but not a member of the local Administrators group... password reset and added to Administrators group, exiting script"
-                Exit
                 }
 
                 Catch [Microsoft.PowerShell.Commands.UserNotFoundException] {
@@ -47,13 +45,11 @@ Try {
         
                 Catch {
                     "An unspecifed error occured, exiting script" | Write-Error
-                    Exit # Stop Powershell!
                 } 
             }
     }
     Catch {
         "An unspecifed error occured, exiting script" | Write-Error
-        Exit # Stop Powershell! 
     }
 
 
