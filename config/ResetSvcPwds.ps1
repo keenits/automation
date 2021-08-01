@@ -52,6 +52,6 @@ Try {
     Catch {
         "An unspecifed error occured, exiting script" | Write-Error
     }
-
-
-Stop-Transcript
+    Finally {
+        Stop-Transcript
+    }
