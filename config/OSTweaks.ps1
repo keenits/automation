@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
-#!Start transcript
-    Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
-    Write-Output "**********************"
+
+Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
+Write-Output "**********************"
 
 #3D objects
     Write-Output "Hiding 3D Objects icon from This PC..."
@@ -223,4 +223,5 @@ $ErrorActionPreference = 'SilentlyContinue'
     Invoke-RestMethod -Uri $download -OutFile $output
     Dism /online /import-defaultappassociations:C:\Windows\System32\defaultassociations.xml
     
-    Stop-Transcript
+
+Stop-Transcript
