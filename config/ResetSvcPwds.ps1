@@ -3,7 +3,7 @@ $VerbosePreference = 'Continue'
 $ObjLocalUser = $null
 
 
-Start-Transcript $ENV:ProgramData\OSDeploy\Logs\RemoveBloatware-transcript.txt
+Start-Transcript $ENV:ProgramData\OSDeploy\Logs\ResetSvcPwds-transcript.txt
 Write-Output "**********************"
 
 
