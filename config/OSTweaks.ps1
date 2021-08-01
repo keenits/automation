@@ -62,8 +62,7 @@ $ErrorActionPreference = 'SilentlyContinue'
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana" -Type DWord -Value 0
 #Desktop shortcuts
     Write-Output "Deleting desktop shortcuts..."
-    Try
-    {
+    Try {
         Remove-Item 'C:\Users\Public\Desktop\Acrobat Reader DC.lnk' -Force
         Remove-Item 'C:\Users\Public\Desktop\Google Chrome.lnk' -Force
         Remove-Item 'C:\Users\Public\Desktop\Microsoft Edge.lnk' -Force
