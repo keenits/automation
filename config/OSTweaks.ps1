@@ -136,13 +136,14 @@ $ErrorActionPreference = 'SilentlyContinue'
         New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" | Out-Null
     }
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Type DWord -Value 1
-    Stop-Process -Name "OneDrive"
-    Start-Sleep -s 2
+    #Stop-Process -Name "OneDrive"
+    #Start-Sleep -s 2
     $onedrive = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
     If (!(Test-Path $onedrive)) {
         $onedrive = "$env:SYSTEMROOT\System32\OneDriveSetup.exe"
     }
-    Start-Process $onedrive "/uninstall" -NoNewWindow -Wait
+    Start-Process $onedrive "/uninstall" -Verb RunAs -Wait
+    #Start-Process $onedrive "/uninstall" -NoNewWindow -Wait
     #Start-Sleep -s 2
     #Stop-Process -Name "explorer"
     #Start-Sleep -s 2
