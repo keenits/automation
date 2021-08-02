@@ -1,3 +1,3 @@
-$user = "%ComputerUsername%
-$secpwd = ConvertTo-SecureString "something" -AsPlainText -Force
-$creds = New-Object System.Management.Automation.PSCredential $User, $secpwd
+$Username = "domain\username"
+$Password = "Passw0rd123!" | ConvertTo-SecureString -AsPlainText -Force
+$UserCredential = New-Object System.Management.Automation.PSCredential -ArgumentList $Username,$Password
