@@ -81,7 +81,7 @@ $START_MENU_LAYOUT = @"
   </DefaultLayoutOverride>
 </LayoutModificationTemplate>
 "@
-    $layoutFile = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\DefaultLayouts.xml"
+    $layoutFile = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml"
     #Delete layout file if it already exists
     If (Test-Path $layoutFile)
     {
