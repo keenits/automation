@@ -65,7 +65,7 @@ Write-Output "**********************"
 
 ############
 #Start layout
-    $START_MENU_LAYOUT = @"
+$START_MENU_LAYOUT = @"
 <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
   <LayoutOptions StartTileGroupCellWidth="6" />
   <DefaultLayoutOverride>
@@ -81,7 +81,7 @@ Write-Output "**********************"
   </DefaultLayoutOverride>
 </LayoutModificationTemplate>
 "@
-    $layoutFile = "C:\Windows\StartMenuLayout.xml"
+    $layoutFile = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\DefaultLayouts.xml"
     #Delete layout file if it already exists
     If (Test-Path $layoutFile)
     {
