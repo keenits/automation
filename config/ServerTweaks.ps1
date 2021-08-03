@@ -79,6 +79,13 @@ $START_MENU_LAYOUT = @"
       </defaultlayout:StartLayout>
     </StartLayoutCollection>
   </DefaultLayoutOverride>
+  <CustomTaskbarLayoutCollection PinListPlacement="Replace">
+    <defaultlayout:TaskbarLayout>
+      <taskbar:TaskbarPinList>
+        <taskbar:DesktopApp DesktopApplicationLinkPath="%ProgramData%\Microsoft\Windows\Start Menu\Programs\Google Chrome.lnk" />
+      </taskbar:TaskbarPinList>
+    </defaultlayout:TaskbarLayout>
+  </CustomTaskbarLayoutCollection>
 </LayoutModificationTemplate>
 "@
     $layoutFile = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml"
