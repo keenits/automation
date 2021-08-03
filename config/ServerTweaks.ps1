@@ -1,37 +1,28 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
 
-Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
+Start-Transcript $ENV:ProgramData\OSDeploy\Logs\ServerTweaks-transcript.txt
 Write-Output "**********************"
 
 
 #BIOS Time
     Write-Output "Setting BIOS time to UTC..."
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" -Name "RealTimeIsUniversal" -Type DWord -Value 1
-    If ((Get-WmiObject -Class Win32_ComputerSystem).PCSystemType -ne 2)
-#Desktop shortcuts
-    #Write-Output "Deleting desktop shortcuts..."
-    #Try {
-        #Remove-Item 'C:\Users\Public\Desktop\Acrobat Reader DC.lnk' -Force
-        #Remove-Item 'C:\Users\Public\Desktop\Google Chrome.lnk' -Force
-        #Remove-Item 'C:\Users\Public\Desktop\Microsoft Edge.lnk' -Force
-    #}
-    #Catch{}
 #Drive letters
     Get-WmiObject -Class Win32_volume -Filter 'DriveType=5' | Select-Object -First 1 | Set-WmiInstance -Arguments @{DriveLetter="Z:"} | Out-Null
 #IEESC
-	  function Disable-InternetExplorerESC {
-      $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
-      $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
-      Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0 -Force
-      Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 1 -Force
-      Stop-Process -Name Explorer -Force
-      Write-Output "IE Enhanced Security Configuration (ESC) has been disabled." -ForegroundColor Green
+    function Disable-InternetExplorerESC {
+        $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
+        $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
+        Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0 -Force
+        Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 1 -Force
+        Stop-Process -Name Explorer -Force
+        Write-Output "IE Enhanced Security Configuration (ESC) has been disabled."
     }
     Disable-InternetExplorerESC
 #Firewall
     Set-NetFirewallRule -Name FPS-ICMP6-ERQ-In, WINRM-HTTP-In-TCP-PUBLIC -Enabled false
-	  Set-NetFirewallRule -Name FPS-ICMP4-ERQ-In -Profile Domain -Enabled true
+    Set-NetFirewallRule -Name FPS-ICMP4-ERQ-In -Profile Domain -Enabled true
     Set-NetFirewallRule -Name RemoteTask-In-TCP,RemoteTask-RPCSS-In-TCP -Profile Domain -Enabled true
     Set-NetFirewallRule -Name RemoteSvcAdmin-In-TCP,RemoteSvcAdmin-NP-In-TCP,RemoteSvcAdmin-RPCSS-In-TCP -Profile Domain -Enabled true
     Set-NetFirewallRule -Name RemoteEventLogSvc-In-TCP,RemoteEventLogSvc-NP-In-TCP,RemoteEventLogSvc-RPCSS-In-TCP -Profile Domain -Enabled true
@@ -52,20 +43,6 @@ Write-Output "**********************"
     Set-Service "MapsBroker" -StartupType Disabled
     Set-Service -Name WinRM -StartupType Automatic
     Start-Service WinRM
-    schtasks /change /tn "\Microsoft\Windows\Workplace Join\Automatic-Device-Join" /disable
-    #Write-Output "Stopping and disabling Diagnostics Tracking Service..."
-    #Stop-Service "DiagTrack" -WarningAction SilentlyContinue
-    #Set-Service "DiagTrack" -StartupType Disabled
-    #Write-Output "Stopping and disabling WAP Push Service..."
-    #Stop-Service "dmwappushservice" -WarningAction SilentlyContinue
-    #Set-Service "dmwappushservice" -StartupType Disabled
-    #Write-Output "Enabling F8 boot menu options..."
-    #bcdedit /set `{current`} bootmenupolicy Legacy | Out-Null
-    #Write-Output "Disabling Remote Assistance..."
-    #Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance" -Name "fAllowToGetHelp" -Type DWord -Value 0
-    #Write-Output "Stopping and disabling Superfetch service..."
-    #Stop-Service "SysMain" -WarningAction SilentlyContinue
-    #Set-Service "SysMain" -StartupType Disabled
 #Start menu
     Write-Output "Disabling recently added apps on start menu..."
     reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v HideRecentlyAddedApps /t REG_DWORD /d 1 /f | Out-Null
@@ -78,7 +55,7 @@ Write-Output "**********************"
 #UAC
     function Disable-UserAccessControl {
         Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value 00000000 -Force
-        Write-Output "User Access Control (UAC) has been disabled." -ForegroundColor Green    
+        Write-Output "User Access Control (UAC) has been disabled."   
     }
     Disable-UserAccessControl
 
@@ -125,10 +102,8 @@ Write-Output "**********************"
     Write-Output "Setting taskbar search icon..."
     reg add "HKLM\DEFAULT\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f
     Write-Output "Cleaning up the taskbar..."
-    #reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\TaskBand" /v Favorites /t REG_BINARY /d ff /f
-    #reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Feeds" /v ShellFeedsTaskbarViewMode /t REG_DWORD /d 2 /f
-    #reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v HideSCAMeetNow /t REG_DWORD /d 1 /f
-    #reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v HideSCAVolume /t REG_DWORD /d 1 /f
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\TaskBand" /v Favorites /t REG_BINARY /d ff /f
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v HideSCAVolume /t REG_DWORD /d 1 /f
 
 ##Unload Hive
     Write-Output "Unloading default profile reg hive..."
