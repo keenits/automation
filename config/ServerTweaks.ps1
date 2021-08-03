@@ -39,7 +39,11 @@ Write-Output "**********************"
     Write-Output "Forced NetBIOS over TCP/IP..."
     }}
     SetTCPIP | Out-Null
+#Server Manager
+    Write-Output "Disabling auto launch of Server Manager"
+    reg add "HKLM\Software\Microsoft\ServerManager" /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null
 #Services
+    Write-Output "Configuring services..."
     Set-Service "MapsBroker" -StartupType Disabled
     Set-Service -Name WinRM -StartupType Automatic
     Start-Service WinRM
@@ -98,6 +102,9 @@ Write-Output "**********************"
 #File operations
     Write-Output "Showing file operations details..."
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager" /v EnthusiastMode /t REG_DWORD /d 1 /f
+#Server Manager
+    Write-Output "Disabling auto launch of Server Manager"
+    reg add "HKLM\DEFAULT\Software\Microsoft\ServerManager" /v CheckedUnattendLaunchSetting /t REG_DWORD /d 0 /f
 #Taskbar
     Write-Output "Setting taskbar search icon..."
     reg add "HKLM\DEFAULT\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f
