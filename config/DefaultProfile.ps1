@@ -8,7 +8,11 @@ Write-Output "**********************"
 #!Start Layout
     Write-Output "Updating default start menu and taskbar items..."
     $path = "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\"
-    $download = "https://raw.githubusercontent.com/keenits/automation/main/files/LayoutModification.xml"
+    IF ("%computername%" -notlike *jmp*) {
+        $download = "https://raw.githubusercontent.com/keenits/automation/main/files/LayoutModificationWin10.xml"
+        }Else {
+            $download = "https://raw.githubusercontent.com/keenits/automation/main/files/LayoutModificationJMP.xml"
+        }
     $output = $path + "LayoutModification.xml"
     Get-ChildItem $path -Recurse | Remove-Item -Force
     Invoke-RestMethod -Uri $download -OutFile $output
