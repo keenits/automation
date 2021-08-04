@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
 
-Start-Transcript $ENV:ProgramData\OSDeploy\Logs\OSTweaks-transcript.txt
+Start-Transcript $ENV:ProgramData\OSDeploy\Logs\Win10Tweaks-transcript.txt
 Write-Output "**********************"
 
 #3D objects
