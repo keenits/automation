@@ -22,6 +22,6 @@ Install-Module OSD -Force
 #    '3' { Start-OSDCloud	} 
 #    '4' { Exit		}
 #}
-Start-OSDCloud -OSLanguage en-us -OSBuild 21H1 -OSEdition Pro -SkipAutopilot -ZTI
+Start-OSDCloud -OSLanguage en-us -OSBuild 21H1 -OSEdition Pro -SkipAutopilot -SkipODT -ZTI
 
 wpeutil reboot
