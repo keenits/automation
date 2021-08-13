@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
 
-Start-Transcript $ENV:ProgramData\OSDeploy\Logs\RemoveBloatware-transcript.txt
+Start-Transcript $ENV:ProgramData\Automation\Logs\RemoveBloatware-transcript.txt
 Write-Output "**********************"
 
 
