@@ -1,4 +1,4 @@
-Start-Transcript $ENV:ProgramData\OSDeploy\Logs\DeleteProfile-transcript.txt -Append
+Start-Transcript $ENV:ProgramData\Automation\Logs\DeleteProfile-transcript.txt -Append
 Write-Output "**********************"
 
 
