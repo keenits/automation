@@ -37,12 +37,13 @@ If ($profile) {
         Write-Output "@username@ profile deleted successfully, exiting script"
     }
     
+    #Win7 version
     Catch [System.Management.Automation.MethodInvocationException] {
         Write-Warning "Profile is locked by another process and cannot be deleted, exiting script"
     }
-    
+    #Win10 version
     Catch [System.IO.FileLoadException] {
-        "Profile is being used by another process, exiting script" | Write-Warning
+        Write-Warning "Profile is locked by another process and cannot be deleted, exiting script"
     }
     
     Catch {
