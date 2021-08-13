@@ -30,19 +30,28 @@ Else {
 }
 
 
-Try {
-    Get-WMIObject -class Win32_UserProfile | Where {$_.LocalPath -like "@username@"} | Remove-WmiObject
-    Write-Output "@username@ profile deleted successfully, exiting script"
-}
+$profile = Get-WMIObject -class Win32_UserProfile | Where { $_.LocalPath.split('\')[-1] -eq '@username@' }
+If ($profile) {
+    Try {
+        $profile.Delete()
+        Write-Output "@username@ profile deleted successfully, exiting script"
+    }
     
-#Catch [System.IO.FileLoadException]{
-#    "Profile is being used by another process, exiting script" | Write-Warning
-#}
-
-Catch {
-    Get-ErrorInformation -incomingError $_
+    Catch [System.Management.Automation.MethodInvocationException] {
+        Write-Warning "Profile is locked by another process and cannot be deleted, exiting script"
+    }
+    
+    Catch [System.IO.FileLoadException] {
+        "Profile is being used by another process, exiting script" | Write-Warning
+    }
+    
+    Catch {
+        Get-ErrorInformation -incomingError $_
+    }
 }
 
-Finally {
-    Stop-Transcript
+Else {
+    Write-Output "No profile for @username@ found, exiting script"
 }
+
+Stop-Transcript
