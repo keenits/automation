@@ -28,8 +28,8 @@ Else {
 
 
 Try {
-    Get-WMIObject -class Win32_UserProfile | Where {$_.LocalPath -like "@Simple_Username@"} | Remove-WmiObject
-    Write-Output "@Simple_Username@ profile deleted successfully, exiting script"
+    Get-WMIObject -class Win32_UserProfile | Where {$_.LocalPath -like "@username@"} | Remove-WmiObject
+    Write-Output "@username@ profile deleted successfully, exiting script"
 }
     
 #Catch [System.IO.FileLoadException]{
