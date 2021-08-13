@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
 
-Start-Transcript $ENV:ProgramData\OSDeploy\Logs\ServerTweaks-transcript.txt
+Start-Transcript $ENV:ProgramData\Automation\Logs\ServerTweaks-transcript.txt
 Write-Output "**********************"
 
 
