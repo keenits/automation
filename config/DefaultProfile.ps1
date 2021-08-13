@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'stop'
 
 
-Start-Transcript $ENV:ProgramData\OSDeploy\Logs\DefaultProfile-transcript.txt
+Start-Transcript $ENV:ProgramData\Automation\Logs\DefaultProfile-transcript.txt
 Write-Output "**********************"
 
 
