@@ -1,3 +1,6 @@
+$ErrorActionPreference = 'SilentlyContinue'
+
+
 Start-Transcript $ENV:ProgramData\Automation\Logs\DeleteProfile-transcript.txt -Append
 Write-Output "**********************"
 
