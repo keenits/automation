@@ -4,6 +4,7 @@ $ErrorActionPreference = 'SilentlyContinue'
 Start-Transcript $ENV:ProgramData\OSDeploy\Logs\Win10Tweaks-transcript.txt
 Write-Output "**********************"
 
+
 #3D objects
     Write-Output "Hiding 3D Objects icon from This PC..."
     Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}" -Recurse
