@@ -10,7 +10,7 @@ $RememberCredential = $false
 $SplitTunnel = $true
 
 
-Start-Transcript $ENV:ProgramData\OSDeploy\Logs\ResetSvcPwds-transcript.txt -Append
+Start-Transcript $ENV:ProgramData\Automation\Logs\ResetSvcPwds-transcript.txt -Append
 Write-Output "**********************"
 
 
