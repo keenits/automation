@@ -8,7 +8,7 @@ Write-Host "1: Zero-Touch Win10 21H1 | English | Pro"-ForegroundColor Yellow
 Write-Host "2: Zero-Touch Win10 20H2 | English | Pro" -ForegroundColor Yellow
 Write-Host "3: I'll select it myself"-ForegroundColor Yellow
 Write-Host "4: Exit`n"-ForegroundColor Yellow
-#$input = Read-Host "Please make a selection"
+$input = Read-Host "Please make a selection"
 
 Write-Host  -ForegroundColor Yellow "Loading OSDCloud..."
 
