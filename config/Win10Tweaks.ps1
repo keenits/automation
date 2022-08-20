@@ -227,7 +227,7 @@ Write-Output "**********************"
 
 #Resize Shadow Storage
     Write-Output "Resizing Shadow Storage..."
-    vssadmin resize shadowstorage /for=C: /on=C: /maxsize=10%
+    vssadmin resize shadowstorage /for=C: /on=C: /maxsize=5%
     
 
 Stop-Transcript
