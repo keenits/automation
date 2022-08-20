@@ -223,6 +223,11 @@ Write-Output "**********************"
     $output = "C:\Windows\System32\defaultassociations.xml"
     Invoke-RestMethod -Uri $download -OutFile $output
     Dism /online /import-defaultappassociations:C:\Windows\System32\defaultassociations.xml
+
+
+#Resize Shadow Storage
+    Write-Output "Resizing Shadow Storage..."
+    vssadmin resize shadowstorage /for=C: /on=C: /maxsize=10%
     
 
 Stop-Transcript
