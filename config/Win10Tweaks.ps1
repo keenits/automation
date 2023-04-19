@@ -86,8 +86,8 @@ Write-Output "**********************"
     reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f | Out-Null
     Write-Output "Disabling first logon animation..."
 #Last logon user
-    Write-Output "Disabling last logged on user list..."
-    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v dontdisplaylastusername /t REG_DWORD /d 1 /f | Out-Null
+    #Write-Output "Disabling last logged on user list..."
+    #reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v dontdisplaylastusername /t REG_DWORD /d 1 /f | Out-Null
 
     reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableFirstLogonAnimation /t REG_DWORD /d 0 /f | Out-Null
 #Location Tracking
