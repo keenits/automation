@@ -10,7 +10,7 @@ It includes a transcript file located at ProgramData\Automation\Logs.
 
 # Define variables
 $taskName = "Service Check"
-$scriptPath = "C:\ProgramData\Automation\ServiceCheck.ps1"
+$scriptPath = "C:\ProgramData\Automation\Scripts\ServiceCheck.ps1"
 $transcriptPath = "$env:ProgramData\Automation\Logs\ServiceCheck_$(Get-Date -Format 'yyyyMMdd').log"
 $ErrorActionPreference = "Stop"
 
@@ -19,7 +19,7 @@ Start-Transcript -Path $transcriptPath
 
 try {
     if (-not (Test-Path $scriptPath)) {
-        throw "The script 'ServiceCheck.ps1' does not exist at 'C:\ProgramData\Automation'."
+        throw "The script 'ServiceCheck.ps1' does not exist at 'C:\ProgramData\Automation\Scripts'."
     }
 
     # Check if the task already exists
