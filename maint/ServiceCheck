@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Checks and starts the services named ltsvc and ltsvcmon. It sets them to start automatically if they are not already set to do so and starts them if they are not running.
+Checks and starts the services named LTService and LTSvcMon. It sets them to start automatically if they are not already set to do so and starts them if they are not running.
 If either service is stuck in the stopping state, it forcefully stops it before starting it again.
 
 .DESCRIPTION
@@ -14,7 +14,7 @@ It includes a transcript file located at ProgramData\Automation\Logs.
 # Define the function to check and start services
 function CheckAndStartServices {
     try {
-        $serviceNames = @("ltsvc", "ltsvcmon")
+        $serviceNames = @("ltservice", "ltsvcmon")
         $logPath = "C:\ProgramData\Automation\Logs\ServiceCheck.log"
 
         # Start transcript
