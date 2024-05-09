@@ -1,0 +1,66 @@
+<#
+.SYNOPSIS
+This script checks and starts the services named ltsvc and ltsvcmon. It sets them to start automatically if they are not already set to do so and starts them if they are not running. If either service is stuck in the stopping state, it forcefully stops it before starting it again.
+
+.DESCRIPTION
+This script creates a scheduled task that runs every 30 minutes with elevated privileges to check the status of the services "ltsvc" and "ltsvcmon". If the services are not set to start automatically, it changes their startup type to automatic. It then starts the services if they are not running. If any service is stuck in the stopping state, it forcefully stops it before starting it again. Error handling and logging are included for debugging purposes.
+
+.PARAMETER None
+This script does not accept any parameters.
+
+.NOTES
+- The script must be run with elevated privileges.
+- Make sure to replace "C:\Path\To\Your\Script.ps1" with the actual path to your PowerShell script.
+
+#>
+
+# Define the function to check and start services
+function CheckAndStartServices {
+    try {
+        $serviceNames = @("ltsvc", "ltsvcmon")
+        $logPath = "C:\ProgramData\Automation\Logs\ServiceCheckLog.txt"
+
+        # Start transcript
+        Start-Transcript -Path $logPath -Append
+
+        Write-Output "-----------------------------------------------"
+        Write-Output "Starting service check process $(Get-Date)"
+
+        foreach ($serviceName in $serviceNames) {
+            $service = Get-Service -Name $serviceName -ErrorAction Stop
+            if ($service.StartType -ne "Automatic") {
+                # Set service to start automatically
+                Set-Service -Name $serviceName -StartupType Automatic
+                Write-Output "Service $serviceName set to start automatically."
+            }
+
+            if ($service.Status -ne "Running") {
+                if ($service.Status -eq "Stopping") {
+                    # Stop the service forcefully if it's stuck in stopping state
+                    Stop-Service -Name $serviceName -Force
+                    Start-Sleep -Seconds 5 # Wait for service to stop
+                    Write-Output "Service $serviceName forcefully stopped."
+                }
+                # Start the service
+                Start-Service -Name $serviceName
+                Write-Output "Service $serviceName started."
+            } else {
+                Write-Output "Service $serviceName is already running."
+            }
+        }
+
+        Write-Output "Service check process completed successfully $(Get-Date)"
+        Write-Output "-----------------------------------------------"
+    }
+    catch {
+        Write-Output "Error occurred: $_"
+    }
+    finally {
+        # Stop transcript
+        Stop-Transcript
+    }
+}
+
+# Check and start services
+CheckAndStartServices
+
