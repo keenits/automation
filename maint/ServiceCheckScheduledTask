@@ -1,53 +1,40 @@
 <#
 .SYNOPSIS
-Creates a scheduled task named "Service Check" that executes a PowerShell script named ServiceCheck.ps1 every 30 minutes with elevated privileges.
+Creates a scheduled task named "ServiceCheck" to run a PowerShell script that checks services running states.
 
 .DESCRIPTION
-Creates a scheduled task named "Service Check" to run a specified PowerShell script every 30 minutes with elevated privileges. 
-It includes a transcript file located at ProgramData\Automation\Logs.
+This script creates a scheduled task named "ServiceCheck" that runs a PowerShell script to check services running states every 30 minutes.
 
 #>
 
 # Define variables
-$taskName = "Service Check"
+$taskName = "ServiceCheck"
 $scriptPath = "C:\ProgramData\Automation\Scripts\ServiceCheck.ps1"
-$transcriptPath = "$env:ProgramData\Automation\Logs\ServiceCheck_$(Get-Date -Format 'yyyyMMdd').log"
+$logFilePath = "C:\ProgramData\Automation\Logs\ServiceCheckScheduledTask_$(Get-Date -Format 'yyyyMMdd').log"
 $ErrorActionPreference = "Stop"
 
-# Start transcript logging
-Start-Transcript -Path $transcriptPath
+
+# Enable transcript logging
+Start-Transcript -Path $logFilePath
 
 try {
-    if (-not (Test-Path $scriptPath)) {
-        throw "The script 'ServiceCheck.ps1' does not exist at 'C:\ProgramData\Automation\Scripts'."
+    # Create the scheduled task
+    schtasks /create /f /ru "NT AUTHORITY\SYSTEM" /tn $taskName /tr "powershell -file $scriptPath -executionpolicy bypass" /sc minute /mo 30
+
+    # Verify task creation
+    if ($?) {
+        Write-Host "Scheduled task '$taskName' created successfully."
+    } else {
+        throw "Error creating scheduled task."
     }
-
-    # Check if the task already exists
-    if (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue) {
-        Write-Host "Scheduled task '$taskName' already exists." -ForegroundColor Yellow
-        exit
-    }
-
-    $actionScript = $scriptPath
-    $triggerInterval = (New-TimeSpan -Minutes 30)
-    $principal = New-ScheduledTaskPrincipal -UserID "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-
-    # Create a new scheduled task action
-    $action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$actionScript`""
-
-    # Create a new trigger for the scheduled task
-    $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval $triggerInterval -RepetitionDuration ([timespan]::MaxValue)
-
-    # Register the scheduled task
-    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -RunLevel Highest -Force
-
-    Write-Host "Scheduled task '$taskName' created successfully." -ForegroundColor Green
-} 
-catch {
-    Write-Host "Error: $_" -ForegroundColor Red
 }
-
+catch {
+    Write-Host "An error occurred: $_"
+}
 finally {
-    # Stop transcript logging
+    # Disable transcript logging
     Stop-Transcript
 }
+
+# Debugging: Output the contents of the log file
+Get-Content -Path $logFilePath
