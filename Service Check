@@ -10,7 +10,6 @@ This script does not accept any parameters.
 
 .NOTES
 - The script must be run with elevated privileges.
-- Make sure to replace "C:\Path\To\Your\Script.ps1" with the actual path to your PowerShell script.
 
 #>
 
@@ -18,7 +17,7 @@ This script does not accept any parameters.
 function CheckAndStartServices {
     try {
         $serviceNames = @("ltsvc", "ltsvcmon")
-        $logPath = "C:\ProgramData\Automation\Logs\ServiceCheckLog.txt"
+        $logPath = "C:\ProgramData\Automation\Logs\ServiceCheck.log"
 
         # Start transcript
         Start-Transcript -Path $logPath -Append
