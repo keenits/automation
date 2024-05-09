@@ -3,11 +3,9 @@
 Creates a scheduled task named "Service Check" that executes a PowerShell script named ServiceCheck.ps1 every 30 minutes with elevated privileges.
 
 .DESCRIPTION
-This PowerShell script creates a scheduled task named "Service Check" to run a specified PowerShell script every 30 minutes with elevated privileges. 
+Creates a scheduled task named "Service Check" to run a specified PowerShell script every 30 minutes with elevated privileges. 
 It includes a transcript file located at ProgramData\Automation\Logs.
 
-.EXAMPLE
-.\Create-ScheduledTask.ps1
 #>
 
 # Define variables
