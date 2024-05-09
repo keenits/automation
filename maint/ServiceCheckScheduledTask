@@ -23,13 +23,13 @@ try {
 
     # Verify task creation
     if ($?) {
-        Write-Host "Scheduled task '$taskName' created successfully."
+        Write-Output "Scheduled task '$taskName' created successfully."
     } else {
         throw "Error creating scheduled task."
     }
 }
 catch {
-    Write-Host "An error occurred: $_"
+    Write-Output "An error occurred: $_"
 }
 finally {
     # Disable transcript logging
