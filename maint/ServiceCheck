@@ -1,9 +1,13 @@
 <#
 .SYNOPSIS
-Checks and starts the services named ltsvc and ltsvcmon. It sets them to start automatically if they are not already set to do so and starts them if they are not running. If either service is stuck in the stopping state, it forcefully stops it before starting it again.
+Checks and starts the services named ltsvc and ltsvcmon. It sets them to start automatically if they are not already set to do so and starts them if they are not running.
+If either service is stuck in the stopping state, it forcefully stops it before starting it again.
 
 .DESCRIPTION
-Creates a scheduled task that runs every 30 minutes with elevated privileges to check the status of the services "ltsvc" and "ltsvcmon". If the services are not set to start automatically, it changes their startup type to automatic. It then starts the services if they are not running. If any service is stuck in the stopping state, it forcefully stops it before starting it again. Error handling and logging are included for debugging purposes.
+Creates a scheduled task that runs every 30 minutes with elevated privileges to check the status of the services "ltsvc" and "ltsvcmon".
+If the services are not set to start automatically, it changes their startup type to automatic. It then starts the services if they are not running.
+If any service is stuck in the stopping state, it forcefully stops it before starting it again. Error handling and logging are included for debugging purposes.
+It includes a transcript file located at ProgramData\Automation\Logs.
 
 #>
 
