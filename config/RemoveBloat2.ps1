@@ -1,3 +1,5 @@
+$Method = "Set"
+
 param (
     [string[]]$customwhitelist
 )
