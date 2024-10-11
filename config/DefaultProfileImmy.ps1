@@ -22,6 +22,11 @@ Write-Output "**********************"
     $output = $path + "LayoutModification.xml"
     Get-ChildItem $path -Recurse | Remove-Item -Force
     Invoke-RestMethod -Uri $download -OutFile $output
+    IF (Test-Path $output) {
+        Write-Output "Layout Modification successfully created at $output" 
+    } else {
+        Write-Output "Error: Layout modification not created"
+    }
 
 ##Load Hive
     Write-Output "Loading default profile reg hive..."
