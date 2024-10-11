@@ -36,7 +36,7 @@ Else {
     Write-Output "The folder $DebloatFolder was successfully created."
 }
 
-Start-Transcript -Path "C:\ProgramData\Automation\Logs\Debloat.log"
+Start-Transcript -Path "C:\ProgramData\Automation\Logs\Debloat\Debloat.log"
 
 ############################################################################################################
 #                                        Remove AppX Packages                                              #
