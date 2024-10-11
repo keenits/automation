@@ -1,3 +1,5 @@
+$Method = "Set"
+
 $ErrorActionPreference = 'SilentlyContinue'
 
 Start-Transcript $ENV:ProgramData\Automation\Logs\Win11Tweaks-transcript.txt
@@ -31,19 +33,19 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" 
 
 # BIOS Time
 # REVISED 10/24 - We are unsure if this is necessary, but consensus leaned toward leaving at UTC. We can reassess if we ever have bios/time issues. 
-Write-Output "Setting BIOS time to UTC..."
+#Write-Output "Setting BIOS time to UTC..."
 
 # Updated Get-WmiObject to Get-CimInstance (Modernization)
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" -Name "RealTimeIsUniversal" -Type DWord -Value 1
-If ((Get-CimInstance -ClassName Win32_ComputerSystem).PCSystemType -ne 2) {
-    Write-Output "Disabling Hibernation..."
-    Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernateEnabled" -Type Dword -Value 0
+# Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" -Name "RealTimeIsUniversal" -Type DWord -Value 1
+# If ((Get-CimInstance -ClassName Win32_ComputerSystem).PCSystemType -ne 2) {
+#     Write-Output "Disabling Hibernation..."
+#     Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernateEnabled" -Type Dword -Value 0
 
-    If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
-        New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" | Out-Null
-    }
-    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" -Name "ShowHibernateOption" -Type Dword -Value 0
-}
+#     If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
+#         New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" | Out-Null
+#     }
+#     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" -Name "ShowHibernateOption" -Type Dword -Value 0
+# }
 
 # Cortana
 # REVISED 10/24
