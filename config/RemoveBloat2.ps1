@@ -4,20 +4,21 @@ param (
     [string[]]$customwhitelist
 )
 
+##This section should be enabled if running directly
 ##Elevate if needed
 
-If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-    write-output "You didn't run this script as an Administrator. This script will self elevate to run as an Administrator and continue."
-    Start-Sleep 1
-    write-output "                                               3"
-    Start-Sleep 1
-    write-output "                                               2"
-    Start-Sleep 1
-    write-output "                                               1"
-    Start-Sleep 1
-    Start-Process powershell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`" -WhitelistApps {1}" -f $PSCommandPath, ($WhitelistApps -join ',')) -Verb RunAs
-    Exit
-}
+# If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
+#     write-output "You didn't run this script as an Administrator. This script will self elevate to run as an Administrator and continue."
+#     Start-Sleep 1
+#     write-output "                                               3"
+#     Start-Sleep 1
+#     write-output "                                               2"
+#     Start-Sleep 1
+#     write-output "                                               1"
+#     Start-Sleep 1
+#     Start-Process powershell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`" -WhitelistApps {1}" -f $PSCommandPath, ($WhitelistApps -join ',')) -Verb RunAs
+#     Exit
+# }
 
 #no errors throughout
 $ErrorActionPreference = 'silentlycontinue'
