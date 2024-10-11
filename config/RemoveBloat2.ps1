@@ -25,7 +25,7 @@ $ErrorActionPreference = 'silentlycontinue'
 
 
 #Create Folder
-$DebloatFolder = "C:\ProgramData\Debloat"
+$DebloatFolder = "C:\ProgramData\Automation\Logs\Debloat"
 If (Test-Path $DebloatFolder) {
     Write-Output "$DebloatFolder exists. Skipping."
 }
@@ -36,7 +36,7 @@ Else {
     Write-Output "The folder $DebloatFolder was successfully created."
 }
 
-Start-Transcript -Path "C:\ProgramData\Debloat\Debloat.log"
+Start-Transcript -Path "C:\ProgramData\Automation\Logs\Debloat.log"
 
 ############################################################################################################
 #                                        Remove AppX Packages                                              #
