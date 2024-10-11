@@ -1732,16 +1732,16 @@ if ($mcafeeinstalled -eq "true") {
     $URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mcafeeclean.zip'
 
     # Set Save Directory
-    $destination = 'C:\ProgramData\Debloat\mcafee.zip'
+    $destination = 'C:\ProgramData\Automation\Debloat\mcafee.zip'
 
     #Download the file
     Invoke-WebRequest -Uri $URL -OutFile $destination -Method Get
 
-    Expand-Archive $destination -DestinationPath "C:\ProgramData\Debloat" -Force
+    Expand-Archive $destination -DestinationPath "C:\ProgramData\Automation\Debloat" -Force
 
     write-output "Removing McAfee"
     # Automate Removal and kill services
-    start-process "C:\ProgramData\Debloat\Mccleanup.exe" -ArgumentList "-p StopServices,MFSY,PEF,MXD,CSP,Sustainability,MOCP,MFP,APPSTATS,Auth,EMproxy,FWdiver,HW,MAS,MAT,MBK,MCPR,McProxy,McSvcHost,VUL,MHN,MNA,MOBK,MPFP,MPFPCU,MPS,SHRED,MPSCU,MQC,MQCCU,MSAD,MSHR,MSK,MSKCU,MWL,NMC,RedirSvc,VS,REMEDIATION,MSC,YAP,TRUEKEY,LAM,PCB,Symlink,SafeConnect,MGS,WMIRemover,RESIDUE -v -s"
+    start-process "C:\ProgramData\Automation\Debloat\Mccleanup.exe" -ArgumentList "-p StopServices,MFSY,PEF,MXD,CSP,Sustainability,MOCP,MFP,APPSTATS,Auth,EMproxy,FWdiver,HW,MAS,MAT,MBK,MCPR,McProxy,McSvcHost,VUL,MHN,MNA,MOBK,MPFP,MPFPCU,MPS,SHRED,MPSCU,MQC,MQCCU,MSAD,MSHR,MSK,MSKCU,MWL,NMC,RedirSvc,VS,REMEDIATION,MSC,YAP,TRUEKEY,LAM,PCB,Symlink,SafeConnect,MGS,WMIRemover,RESIDUE -v -s"
     write-output "McAfee Removal Tool has been run"
 
     ###New MCCleanup
@@ -1751,17 +1751,17 @@ if ($mcafeeinstalled -eq "true") {
     $URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mccleanup.zip'
 
     # Set Save Directory
-    $destination = 'C:\ProgramData\Debloat\mcafeenew.zip'
+    $destination = 'C:\ProgramData\Automation\Debloat\mcafeenew.zip'
 
     #Download the file
     Invoke-WebRequest -Uri $URL -OutFile $destination -Method Get
 
-    New-Item -Path "C:\ProgramData\Debloat\mcnew" -ItemType Directory
-    Expand-Archive $destination -DestinationPath "C:\ProgramData\Debloat\mcnew" -Force
+    New-Item -Path "C:\ProgramData\Automation\Debloat\mcnew" -ItemType Directory
+    Expand-Archive $destination -DestinationPath "C:\ProgramData\Automation\Debloat\mcnew" -Force
 
     write-output "Removing McAfee"
     # Automate Removal and kill services
-    start-process "C:\ProgramData\Debloat\mcnew\Mccleanup.exe" -ArgumentList "-p StopServices,MFSY,PEF,MXD,CSP,Sustainability,MOCP,MFP,APPSTATS,Auth,EMproxy,FWdiver,HW,MAS,MAT,MBK,MCPR,McProxy,McSvcHost,VUL,MHN,MNA,MOBK,MPFP,MPFPCU,MPS,SHRED,MPSCU,MQC,MQCCU,MSAD,MSHR,MSK,MSKCU,MWL,NMC,RedirSvc,VS,REMEDIATION,MSC,YAP,TRUEKEY,LAM,PCB,Symlink,SafeConnect,MGS,WMIRemover,RESIDUE -v -s"
+    start-process "C:\ProgramData\Automation\Debloat\mcnew\Mccleanup.exe" -ArgumentList "-p StopServices,MFSY,PEF,MXD,CSP,Sustainability,MOCP,MFP,APPSTATS,Auth,EMproxy,FWdiver,HW,MAS,MAT,MBK,MCPR,McProxy,McSvcHost,VUL,MHN,MNA,MOBK,MPFP,MPFPCU,MPS,SHRED,MPSCU,MQC,MQCCU,MSAD,MSHR,MSK,MSKCU,MWL,NMC,RedirSvc,VS,REMEDIATION,MSC,YAP,TRUEKEY,LAM,PCB,Symlink,SafeConnect,MGS,WMIRemover,RESIDUE -v -s"
     write-output "McAfee Removal Tool has been run"
 
     $InstalledPrograms = $allstring | Where-Object { ($_.Name -like "*McAfee*") }
@@ -1913,15 +1913,15 @@ $xml = @"
 "@
 
 ##write XML to the debloat folder
-$xml | Out-File -FilePath "C:\ProgramData\Debloat\o365.xml"
+$xml | Out-File -FilePath "C:\ProgramData\Automation\Debloat\o365.xml"
 
 ##Download the ODT
 $odturl = "https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/odt.exe"
-$odtdestination = "C:\ProgramData\Debloat\odt.exe"
+$odtdestination = "C:\ProgramData\Automation\Debloat\odt.exe"
 Invoke-WebRequest -Uri $odturl -OutFile $odtdestination -Method Get -UseBasicParsing
 
 ##Run it
-Start-Process -FilePath "C:\ProgramData\Debloat\odt.exe" -ArgumentList "/configure C:\ProgramData\Debloat\o365.xml" -Wait
+Start-Process -FilePath "C:\ProgramData\Automation\Debloat\odt.exe" -ArgumentList "/configure C:\ProgramData\Automation\Debloat\o365.xml" -Wait
 
 }
 else {
