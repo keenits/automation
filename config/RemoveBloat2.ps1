@@ -70,8 +70,6 @@ $WhitelistedApps = @(
     'Microsoft.SecHealthUI',
     'WavesAudio.MaxxAudioProforDell2019',
     'Dell Optimizer Core',
-    'Dell SupportAssist Remediation',
-    'Dell SupportAssist OS Recovery Plugin for Dell Update',
     'Dell Pair',
     'Dell Display Manager 2.0',
     'Dell Display Manager 2.1',
