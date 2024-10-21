@@ -269,8 +269,8 @@ Disable-ScheduledTask -TaskName "Microsoft\Windows\Customer Experience Improveme
 Disable-ScheduledTask -TaskName "Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector" | Out-Null
 
 # Windows PIN
-Write-Output "Disabling Windows PIN..."
-reg add "HKLM\SOFTWARE\Policies\Microsoft\PassportForWork" /v Enabled /t REG_DWORD /d 0 /f | Out-Null
+#Write-Output "Disabling Windows PIN..."
+#reg add "HKLM\SOFTWARE\Policies\Microsoft\PassportForWork" /v Enabled /t REG_DWORD /d 0 /f | Out-Null
 
 # Windows updates
 Write-Output "Restricting Windows Update P2P only to local network..."
