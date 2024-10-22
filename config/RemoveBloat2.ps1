@@ -1,8 +1,8 @@
-$Method = "Set"
-
 param (
     [string[]]$customwhitelist
 )
+
+$Method = "Set"
 
 ##This section should be enabled if running directly
 ##Elevate if needed
