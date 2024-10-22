@@ -6,7 +6,6 @@ $ErrorActionPreference = 'stop'
 #Disable Widgets from taskbar
 #Align Start Menu to the left
 #Formatting changes to remove Automate specific variables (e.g. %computername%)
-#Added pauses just after the hive loads and just before it unloads to ensure all operations have time to complete. Log was showing errors on some reg add commands that were properly formatted.
 
 Start-Transcript $ENV:ProgramData\Automation\Logs\DefaultProfile-transcript.txt
 Write-Output "**********************"
@@ -33,7 +32,7 @@ Write-Output "**********************"
     Write-Output "Loading default profile reg hive..."
     reg load HKLM\DEFAULT c:\users\default\ntuser.dat
 
-# Pause to ensure hive fully loads before starting operations...
+# Pause to ensure hive fully loads before making changes
 Start-Sleep -Seconds 3    
 
 #App suggestions
@@ -80,7 +79,8 @@ Start-Sleep -Seconds 3
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoComplete" /v "Append Completion" /t REG_SZ /d "yes" /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPath /t REG_DWORD /d 1 /f
-    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v Settings /t REG_BINARY /d 0c00020b01000060000000 /f    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 2 /f
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v Settings /t REG_BINARY /d 0c00020b01000060000000 /f    
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 2 /f
 # Remove Copilot icon from taskbar
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowCopilotButton /t REG_DWORD /d 0 /f
 # Disable Widgets
