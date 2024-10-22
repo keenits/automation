@@ -6,6 +6,7 @@ $ErrorActionPreference = 'stop'
 #Disable Widgets from taskbar
 #Align Start Menu to the left
 #Formatting changes to remove Automate specific variables (e.g. %computername%)
+#Added pauses just after the hive loads and just before it unloads to ensure all operations have time to complete. Log was showing errors on some reg add commands that were properly formatted.
 
 Start-Transcript $ENV:ProgramData\Automation\Logs\DefaultProfile-transcript.txt
 Write-Output "**********************"
@@ -31,6 +32,9 @@ Write-Output "**********************"
 ##Load Hive
     Write-Output "Loading default profile reg hive..."
     reg load HKLM\DEFAULT c:\users\default\ntuser.dat
+
+# Pause to ensure hive fully loads before starting operations...
+Start-Sleep -Seconds 3    
 
 #App suggestions
     Write-Output "Disabling Application suggestions..."
@@ -115,6 +119,9 @@ Write-Output "**********************"
 #Tracking
     Write-Output "Disabling some tracking feature..."
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f
+
+# Pause to ensure all operations complete before unloading
+    Start-Sleep -Seconds 3
 
 ##Unload Hive
     Write-Output "Unloading default profile reg hive..."
