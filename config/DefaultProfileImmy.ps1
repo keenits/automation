@@ -72,7 +72,8 @@ Start-Sleep -Seconds 3
     reg add "HKLM\DEFAULT\Control Panel\Desktop" /v Wallpaper /t REG_SZ /f
 #Explorer
     Write-Output "Configuring Explorer settings..."
-    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShellState /t REG_BINARY /d 240000001C28000000000000000000000000000001000000130000000000000062000000 /f
+    #reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShellState /t REG_BINARY /d 240000001C28000000000000000000000000000001000000130000000000000062000000 /f #OriginalValue (Single Click)
+    reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShellState /t REG_BINARY /d 240000003728000000000000000000000000000001000000130000000000000062000000 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v DontUsePowerShellOnWinX /t REG_DWORD /d 0 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f
     reg add "HKLM\DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
