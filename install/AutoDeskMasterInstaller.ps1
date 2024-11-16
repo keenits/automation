@@ -1,6 +1,12 @@
 #For use in connectwise Automate
 #@SoftwareName@ variable must be defined in Automate and inserted into script. Otherwise, define $softwarename manually
 
+param (
+    [string]$SoftwareName,
+)
+
+Write-Output "Autodesk Product Selected: $SoftwareName"
+
 $ProgressPreference = 'SilentlyContinue'
 $FirstFileDownloadURL = $null
 
@@ -112,7 +118,7 @@ function Set-ProductKey {
 }
 
 
-$SoftwareName = "@SoftwareName@"
+#$SoftwareName = "@SoftwareName@"
 $SoftwareName = $SoftwareName.ToLower()
 
 $ExtractionDestination = "C:\Autodesk"
