@@ -441,6 +441,6 @@ if ($InstallLevel) {
 Write-Host "$SetupArguments"
 
 $JoinedArgumentList = $SetupArguments
-Write-Progress "Running`r`n $SetupExePath $JoinedArgumentList"
+Write-Host "Running`r`n $SetupExePath $JoinedArgumentList"
 
-Start-Process $SetupExePath -ArgumentList $JoinedArgumentList -PassThru
+Start-Process $SetupExePath -ArgumentList $JoinedArgumentList -Wait
