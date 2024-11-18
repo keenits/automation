@@ -2,7 +2,7 @@
 #@SoftwareName@ variable must be defined in Automate and inserted into script. Otherwise, define $softwarename manually
 
 param (
-    [string]$SoftwareName,
+    [string]$SoftwareName
 )
 
 Write-Output "Autodesk Product Selected: $SoftwareName"
