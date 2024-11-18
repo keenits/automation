@@ -1,9 +1,10 @@
-#For use in connectwise Automate
-#@SoftwareName@ variable must be defined in Automate and inserted into script. Otherwise, define $softwarename manually
-
 param (
     [string]$SoftwareName
 )
+
+#For use in connectwise Automate
+#@SoftwareName@ variable must be defined in Automate and inserted into script. Otherwise, define $softwarename manually
+
 
 Write-Output "Autodesk Product Selected: $SoftwareName"
 
