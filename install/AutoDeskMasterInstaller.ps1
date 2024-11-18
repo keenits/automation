@@ -389,7 +389,7 @@ if ($Year -le 2024) {
             # Start extraction process
             Write-Progress -Activity "Installing" -Status "Running $SFXExePath with arguments $ExtractionArguments"
             Write-Host "Running`r`n$SFXExePath $ExtractionArguments"
-            Start-Process -FilePath $SFXExePath -ArgumentList "`"-suppresslaunch -d `"C:\Autodesk`"`"" -Wait -PassThru
+            Start-Process $SFXExePath "-suppresslaunch -d `"`C:\Autodesk`"" -Wait -PassThru
         }
 
         Write-Host "Extraction completed in $($ExtractionDuration.TotalSeconds) seconds"
