@@ -440,6 +440,20 @@ if ($InstallLevel) {
 
 Write-Host "$SetupArguments"
 
+# THESE ENVIRONMENT VARIABLES ARE MISSING IN SYSTEM CONTEXT, NEED TO DEFINE THEM TO PREVENT THE ODIS INSTALLER FROM FAILING
+$env:HOMEDRIVE = "C:"
+$env:HOMEPATH = "\Windows\System32\config\systemprofile"
+$env:USERPROFILE = Join-Path $env:HOMEDRIVE $env:HOMEPATH
+
+# MSI 1606 Fix
+$ShellFolderRegPath = 'Registry::HKEY_USERS\.DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+if (!(Test-Path $ShellFolderRegPath)) {
+    New-Item -Path $ShellFolderRegPath -Force | Out-Null
+}
+New-ItemProperty -Path $ShellFolderRegPath -Name 'Local Settings' -Value (Join-Path $env:USERPROFILE 'AppData\Roaming') -Force | Out-Null
+New-ItemProperty -Path $ShellFolderRegPath -Name 'Local AppData' -Value (Join-Path $env:USERPROFILE 'AppData\Roaming') -Force | Out-Null
+
+# Continue with the execution of the installer
 $JoinedArgumentList = $SetupArguments
 Write-Host "Running`r`n $SetupExePath $JoinedArgumentList"
 
