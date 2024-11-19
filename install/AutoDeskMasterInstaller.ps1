@@ -241,6 +241,7 @@ $ProductID = switch -Wildcard ($FirstFileDownloadURL)
     "*INVPROSA*"  { "INVENTOR" }
     "*RVT*"       { "RVT" }
     "*3DSMAX*"    { "MAX" }
+    "*CIV3D*"     { "CIV3D" }
     "*AMECH_PP*"  { "ACM_MAIN" }
     "*ARCHDESK*"  { "ACM_MAIN" }
     "*ACD*"       { "ACAD_MAIN" }
