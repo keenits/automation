@@ -419,24 +419,25 @@ if ($Year -ge 2022) {
 
 Write-Host "$SetupArguments"
 
-$SetupArguments += "/t /w /language $Language /c $ProductID`:"
-if ($null -ne $InstallDir -and $InstallDir -ne "" -or $SoftwareName -notlike "Autocad*") {
-    $SetupArguments += "INSTALLDIR=`"$InstallDir`""
-}
-if ($SerialNumber) {
-    $SerialPrefix = $SerialNumber.Split('-')[0]
-    $SerialPostfix = $SerialNumber.Split('-')[1]
-    $SetupArguments += "ACADSERIALPREFIX=$SerialPrefix ACADSERIALNUMBER=$SerialPostfix"
-}
-if ($ProductKey) {
-    $SetupArguments += "ADLM_PRODKEY=$ProductKey"
-}
-if ($Country) {
-    $SetupArguments += "ADLM_EULA_COUNTRY=$Country"
-}
-if ($InstallLevel) {
-    $SetupArguments += "InstallLevel=$InstallLevel"
-}
+$SetupArguments += "/t /w /language $Language /c"
+#$SetupArguments += "/t /w /language $Language /c $ProductID`:"
+# if ($null -ne $InstallDir -and $InstallDir -ne "" -or $SoftwareName -notlike "Autocad*") {
+#     $SetupArguments += "INSTALLDIR=`"$InstallDir`""
+# }
+# if ($SerialNumber) {
+#     $SerialPrefix = $SerialNumber.Split('-')[0]
+#     $SerialPostfix = $SerialNumber.Split('-')[1]
+#     $SetupArguments += "ACADSERIALPREFIX=$SerialPrefix ACADSERIALNUMBER=$SerialPostfix"
+# }
+# if ($ProductKey) {
+#     $SetupArguments += "ADLM_PRODKEY=$ProductKey"
+# }
+# if ($Country) {
+#     $SetupArguments += "ADLM_EULA_COUNTRY=$Country"
+# }
+# if ($InstallLevel) {
+#     $SetupArguments += "InstallLevel=$InstallLevel"
+# }
 
 Write-Host "$SetupArguments"
 
