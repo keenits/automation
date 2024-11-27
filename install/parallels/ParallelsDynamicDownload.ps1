@@ -178,7 +178,9 @@ $DynamicVersions.Versions = @($WindowsMSIs.psobject.properties | %{@(
         $null = $Uri -match "/(.+)$"
         New-DynamicVersion -Uri $Uri -Version $Version -Architecture $Architecture -FileName $Matches[2]
     }
-)})
+  )
+ }
+)
 
 $InstallerUrl = $DynamicVersions.Versions[0].Url
 
