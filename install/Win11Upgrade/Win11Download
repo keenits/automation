@@ -1,0 +1,6 @@
+#Download Win11 ISO
+$ProgressPreference = 'SilentlyContinue'
+$URL = "https://keenits.sharepoint.com/:u:/s/download/EXcZpV9xk5RJpsjrLw513rIBEeHpqH8_q634mVssONncOg?e=OuvdlH
+$Output ="$env:ProgramData\Automation\Apps\Win1124h2.iso"
+
+Invoke-WebRequest -Uri $Url -OutFile $Output
