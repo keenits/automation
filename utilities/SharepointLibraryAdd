@@ -15,7 +15,7 @@
 
 param(
     [string]$LibraryId,
-    [string]$Name
+    [string]$LibraryName
 )
 
 $regPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive\TenantAutoMount"
@@ -35,7 +35,7 @@ if ([string]::IsNullOrWhiteSpace($LibraryId)) {
 }
 
 # Validate Name was provided
-if ([string]::IsNullOrWhiteSpace($Name)) {
+if ([string]::IsNullOrWhiteSpace($LibraryName)) {
     Write-Output "ERROR: No Name provided. Enter a friendly label (e.g. 'Corporate - General') into the Name variable."
     exit 4
 }
@@ -54,17 +54,17 @@ foreach ($token in $required) {
 
 # Warn if an entry with this name already exists (overwrite is allowed but flagged)
 if (Test-Path $regPath) {
-    $existing = Get-ItemProperty -Path $regPath -Name $Name -ErrorAction SilentlyContinue
+    $existing = Get-ItemProperty -Path $regPath -Name $LibraryName -ErrorAction SilentlyContinue
     if ($existing) {
-        Write-Output "NOTE: A value named '$Name' already exists and will be overwritten."
+        Write-Output "NOTE: A value named '$LibraryName' already exists and will be overwritten."
     }
 }
 
 # Write the policy
 try {
     if (!(Test-Path $regPath)) { New-Item -Path $regPath -Force | Out-Null }
-    New-ItemProperty -Path $regPath -Name $Name -Value $url -PropertyType String -Force | Out-Null
-    Write-Output "SUCCESS: Deployed sync '$Name'."
+    New-ItemProperty -Path $regPath -Name $LibraryName -Value $url -PropertyType String -Force | Out-Null
+    Write-Output "SUCCESS: Deployed sync '$LibraryName'."
     exit 0
 }
 catch {
