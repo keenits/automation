@@ -14,7 +14,7 @@
 #>
 
 # ===================== Variables =====================
-$URL            = "PASTE_CUSTOMER_SPECIFIC_URL_HERE"
+$URL            = "https://installer.blackpointcyber.com/production/cddec4c4-7c17-45b8-b724-50ca814ef84c/PacRimEngineering_snap_installer.exe"
 $AppDir         = "$env:ProgramData\Automation\Apps"
 $InstallerName  = "PacRimEngineering_snap_installer.exe"
 $InstallerPath  = Join-Path $AppDir $InstallerName
