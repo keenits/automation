@@ -14,9 +14,9 @@
 #>
 
 # ===================== Variables =====================
-$URL            = "https://installer.blackpointcyber.com/production/cddec4c4-7c17-45b8-b724-50ca814ef84c/PacRimEngineering_snap_installer.exe"
+$URL            = "https://installer.blackpointcyber.com/production/ab20d9d2-1a4f-4b76-8e9c-d92d1652c7cd/KeenITServices_snap_installer.exe"
 $AppDir         = "$env:ProgramData\Automation\Apps"
-$InstallerName  = "PacRimEngineering_snap_installer.exe"
+$InstallerName  = "KeenITServices_snap_installer.exe"
 $InstallerPath  = Join-Path $AppDir $InstallerName
 $LogPath        = "$env:ProgramData\Automation\Logs\SnapAgent_Download.log"
 
