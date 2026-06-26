@@ -15,7 +15,7 @@
 
 # ===================== Variables =====================
 $AppDir         = "$env:ProgramData\Automation\Apps"
-$InstallerName  = "PacRimEngineering_snap_installer.exe"
+$InstallerName  = "KeenITServices_snap_installer.exe"
 $InstallerPath  = Join-Path $AppDir $InstallerName
 $LogPath        = "$env:ProgramData\Automation\Logs\SnapAgent_Install.log"
 
