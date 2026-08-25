@@ -444,7 +444,7 @@ if ($wlanFilters -match "wep") {
 #         Write-Output "  [FAIL] $($expected.Value) - Not configured"
 #     }
 # }
-
+New-Item -Path "$ENV:ProgramData\Automation\Logs\Win11Tweaks-CMMC-Applied.txt" -ItemType File
 Write-Output "Win11Tweaks-CMMC have been applied"
 
 Stop-Transcript
