@@ -445,6 +445,6 @@ if ($wlanFilters -match "wep") {
 #     }
 # }
 
-Write-Output "PacRim Baseline Hardening Script Complete"
+Write-Output "Win11Tweaks-CMMC have been applied"
 
 Stop-Transcript
