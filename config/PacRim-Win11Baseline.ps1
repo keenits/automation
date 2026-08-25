@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
-Start-Transcript $ENV:ProgramData\Automation\Logs\PacRim-Baseline-Hardening-transcript.txt
+Start-Transcript $ENV:ProgramData\Automation\Logs\Win11Tweaks-CMMC-transcript.txt
 Write-Output "PacRim Baseline Hardening Script"
 
 #  SECURITY HARDENING
