@@ -29,11 +29,23 @@ function Test-CMMCCompliance {
 
     #  Windows features
     $smb1 = Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
-    $lines.Add("SMBv1: $($smb1.State)")
+    if ($null -eq $smb1) {
+        $lines.Add("SMBv1: Feature not found on this system")
+    } else {
+        $lines.Add("SMBv1: $($smb1.State)")
+    }
     $psv2 = Get-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root
-    $lines.Add("PowerShell v2: $($psv2.State)")
+    if ($null -eq $psv2) {
+        $lines.Add("PowerShell v2: Feature not found on this system")
+    } else {
+        $lines.Add("PowerShell v2: $($psv2.State)")
+    }
     $telnet = Get-WindowsOptionalFeature -Online -FeatureName TelnetClient
-    $lines.Add("Telnet Client: $($telnet.State)")
+    if ($null -eq $telnet) {
+        $lines.Add("Telnet Client: Feature not found on this system")
+    } else {
+        $lines.Add("Telnet Client: $($telnet.State)")
+    }
 
     #  LLMNR
     $llmnr = Get-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -ErrorAction SilentlyContinue
@@ -114,17 +126,25 @@ function Test-CMMCCompliance {
     $lines.Add("MSI Restriction (1=SYSTEM-only): $($msi.DisableMSI)")
 
     #  Wireless filters
+    #  netsh wlan commands fail outright on machines with no wireless adapter
+    #  (desktops, wired-only). Check for adapter presence first so those
+    #  machines report N/A instead of a false FAIL.
     $lines.Add("Wireless Filter Verification:")
-    $wlanFilters = netsh wlan show filters 2>&1
-    if ($wlanFilters -match "open") {
-        $lines.Add("  [PASS] Open network block filter present")
+    $wirelessAdapters = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.InterfaceDescription -match "Wireless|Wi-Fi|802\.11" -or $_.MediaType -eq "Native 802.11" }
+    if ($null -eq $wirelessAdapters -or @($wirelessAdapters).Count -eq 0) {
+        $lines.Add("  [N/A] No wireless adapter present on this system")
     } else {
-        $lines.Add("  [FAIL] Open network block filter not found")
-    }
-    if ($wlanFilters -match "wep") {
-        $lines.Add("  [PASS] WEP network block filter present")
-    } else {
-        $lines.Add("  [FAIL] WEP network block filter not found")
+        $wlanFilters = netsh wlan show filters 2>&1
+        if ($wlanFilters -match "open") {
+            $lines.Add("  [PASS] Open network block filter present")
+        } else {
+            $lines.Add("  [FAIL] Open network block filter not found")
+        }
+        if ($wlanFilters -match "wep") {
+            $lines.Add("  [PASS] WEP network block filter present")
+        } else {
+            $lines.Add("  [FAIL] WEP network block filter not found")
+        }
     }
 
     $result = $lines -join "`r`n"
