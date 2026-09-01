@@ -5,6 +5,14 @@ Write-Output "**********************"
 Write-Output "PacRim Baseline Hardening Script - Recurring"
 Write-Output "**********************"
 
+#  Timestamped archive folder for this run's Pre/Post check output. The fixed-path
+#  files (PacRim-Recurring-PreCheck.txt / PostCheck.txt) are still written for
+#  Automate to read reliably; this folder keeps a dated copy of each run for
+#  historical reference.
+$runTimestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
+$archiveFolder = "C:\ProgramData\Automation\Logs\PacRim-Recurring-History\$runTimestamp"
+New-Item -Path $archiveFolder -ItemType Directory -Force | Out-Null
+
 #  Reusable compliance check, called before and after the hardening actions below
 #  so the transcript shows what drifted vs what was already compliant.
 #  Builds its lines into an array, prints them (so the transcript looks the same
@@ -125,6 +133,11 @@ function Test-CMMCCompliance {
 
 $preCheckOutput = Test-CMMCCompliance -Label "PRE-CHECK (Before Changes)"
 Write-Output $preCheckOutput
+
+#  Written immediately (not batched with PostCheck at the end) so this survives
+#  even if a hardening action below throws a terminating error mid-run.
+$preCheckOutput | Out-File "C:\ProgramData\Automation\Logs\PacRim-Recurring-PreCheck.txt" -Encoding UTF8 -Force
+$preCheckOutput | Out-File "$archiveFolder\PreCheck.txt" -Encoding UTF8 -Force
 
 #  SECURITY HARDENING
 
@@ -404,11 +417,10 @@ vssadmin resize shadowstorage /for=C: /on=C: /maxsize=5%
 $postCheckOutput = Test-CMMCCompliance -Label "POST-CHECK (After Changes)"
 Write-Output $postCheckOutput
 
-#  Export pre/post-check text to separate files so Automate can read each one
-#  into its own variable after this script step completes (e.g. via a
-#  "Get Contents of File into Variable" step, into %PreCheck% / %PostCheck%).
-$preCheckOutput | Out-File "C:\ProgramData\Automation\Logs\PacRim-Recurring-PreCheck.txt" -Encoding UTF8 -Force
+#  Export PostCheck to the fixed path (for Automate to read into %PostCheck%)
+#  and the dated archive folder (historical record alongside PreCheck.txt).
 $postCheckOutput | Out-File "C:\ProgramData\Automation\Logs\PacRim-Recurring-PostCheck.txt" -Encoding UTF8 -Force
+$postCheckOutput | Out-File "$archiveFolder\PostCheck.txt" -Encoding UTF8 -Force
 
 Write-Output "**********************"
 Write-Output "PacRim Baseline Hardening Script - Recurring Complete"
