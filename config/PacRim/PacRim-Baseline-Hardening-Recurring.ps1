@@ -125,47 +125,6 @@ function Test-CMMCCompliance {
     $msi = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" -Name "DisableMSI" -ErrorAction SilentlyContinue
     $lines.Add("MSI Restriction (1=SYSTEM-only): $($msi.DisableMSI)")
 
-    #  Wireless filters
-    #  Since the apply step registers filters then restores WlanSvc to its original
-    #  state, the service may read as stopped here even when filters are genuinely
-    #  in place. Temporarily start it just long enough to check, then restore it,
-    #  same pattern as the apply step, so this gives a true PASS/FAIL rather than
-    #  a false N/A whenever an adapter is present.
-    $lines.Add("Wireless Filter Verification:")
-    $wirelessAdapters = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.InterfaceDescription -match "Wireless|Wi-Fi|802\.11" -or $_.MediaType -eq "Native 802.11" }
-    if ($null -eq $wirelessAdapters -or @($wirelessAdapters).Count -eq 0) {
-        $lines.Add("  [N/A] No wireless adapter present on this system")
-    } else {
-        $wlanService = Get-Service -Name "WlanSvc" -ErrorAction SilentlyContinue
-        if ($null -eq $wlanService) {
-            $lines.Add("  [N/A] WlanSvc service not found - cannot verify wireless filters")
-        } else {
-            $wlanWasRunning = ($wlanService.Status -eq "Running")
-            $wlanOriginalStartType = $wlanService.StartType
-            if (-not $wlanWasRunning) {
-                Set-Service -Name "WlanSvc" -StartupType Manual -ErrorAction SilentlyContinue
-                Start-Service -Name "WlanSvc" -ErrorAction SilentlyContinue
-            }
-
-            $wlanFilters = netsh wlan show filters 2>&1
-            if ($wlanFilters -match "open") {
-                $lines.Add("  [PASS] Open network block filter present")
-            } else {
-                $lines.Add("  [FAIL] Open network block filter not found")
-            }
-            if ($wlanFilters -match "wep") {
-                $lines.Add("  [PASS] WEP network block filter present")
-            } else {
-                $lines.Add("  [FAIL] WEP network block filter not found")
-            }
-
-            if (-not $wlanWasRunning) {
-                Stop-Service -Name "WlanSvc" -Force -ErrorAction SilentlyContinue
-                Set-Service -Name "WlanSvc" -StartupType $wlanOriginalStartType -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     $result = $lines -join "`r`n"
     return $result
 }
@@ -351,44 +310,17 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup\Private" /v
 
 #  WIRELESS SECURITY
 
-#  Block insecure wireless network types
-#  Registered even if wireless isn't in use today. If a wireless adapter is
-#  present but WlanSvc is stopped, netsh wlan commands fail outright - so the
-#  service is started just long enough to register the filters (they persist
-#  to disk, not just runtime memory), then restored to its original state.
-#  This means the block is already in place the moment wireless ever gets
-#  turned on, rather than only being registered the next time this script
-#  happens to run while the service is already up.
-
-$wirelessAdapters = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.InterfaceDescription -match "Wireless|Wi-Fi|802\.11" -or $_.MediaType -eq "Native 802.11" }
-if ($null -eq $wirelessAdapters -or @($wirelessAdapters).Count -eq 0) {
-    Write-Output "No wireless adapter present - skipping wireless filter setup"
-} else {
-    $wlanService = Get-Service -Name "WlanSvc" -ErrorAction SilentlyContinue
-    if ($null -eq $wlanService) {
-        Write-Output "WlanSvc service not found - cannot register wireless filters"
-    } else {
-        $wlanWasRunning = ($wlanService.Status -eq "Running")
-        $wlanOriginalStartType = $wlanService.StartType
-        if (-not $wlanWasRunning) {
-            Write-Output "Temporarily starting WlanSvc to register wireless filters..."
-            Set-Service -Name "WlanSvc" -StartupType Manual -ErrorAction SilentlyContinue
-            Start-Service -Name "WlanSvc" -ErrorAction SilentlyContinue
-        }
-
-        Write-Output "Blocking open wireless networks..."
-        netsh wlan add filter permission=block networktype=infrastructure ssid="" matchtype=wildcard security=open | Out-Null
-
-        Write-Output "Blocking WEP wireless networks..."
-        netsh wlan add filter permission=block networktype=infrastructure ssid="" matchtype=wildcard security=wep | Out-Null
-
-        if (-not $wlanWasRunning) {
-            Write-Output "Restoring WlanSvc to its original state..."
-            Stop-Service -Name "WlanSvc" -Force -ErrorAction SilentlyContinue
-            Set-Service -Name "WlanSvc" -StartupType $wlanOriginalStartType -ErrorAction SilentlyContinue
-        }
-    }
-}
+#  Block open/WEP wireless networks - NOT IMPLEMENTED
+#  netsh wlan add filter has no security-type parameter (no "matchtype" or
+#  "security" option exists - confirmed against Microsoft's netsh wlan
+#  documentation). It can only filter by exact SSID name or deny-all, not by
+#  authentication type. The command previously here was invalid syntax and
+#  had been silently failing since it was first added. Removed rather than
+#  left in place reporting a false PASS/FAIL for a control that was never
+#  actually applied. Real options: deny-all + explicit allow of PacRim's
+#  known SSID(s) once confirmed, or rely on the wireless infrastructure
+#  (Meraki) to refuse open/WEP at the AP level, which was always the
+#  primary enforcement layer for AC.L2-3.1.17 anyway.
 
 #  Disable Mobile Hotspot
 Write-Output "Disabling Mobile Hotspot (Internet Connection Sharing)..."
