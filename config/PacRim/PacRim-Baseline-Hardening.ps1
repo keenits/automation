@@ -345,36 +345,42 @@ Write-Output "Resizing Shadow Storage..."
 vssadmin resize shadowstorage /for=C: /on=C: /maxsize=5%
 
 #  VERIFICATION
+#  Results are captured into a variable as they're generated (not just printed),
+#  so the same content can be written to the Win11Tweaks-CMMC-Applied.txt marker
+#  file below. ImmyBot uses that file's existence to detect a completed run; it
+#  now also holds the actual verification results rather than being empty.
 
-Write-Output "**********************"
-Write-Output "Verification Results"
-Write-Output "**********************"
+$verificationLines = New-Object System.Collections.Generic.List[string]
+
+$verificationLines.Add("**********************")
+$verificationLines.Add("Verification Results")
+$verificationLines.Add("**********************")
 
 #  ===== CM.L2-3.4.6 - Least Functionality =====
-Write-Output ""
-Write-Output "--- CM.L2-3.4.6 (Least Functionality) ---"
+$verificationLines.Add("")
+$verificationLines.Add("--- CM.L2-3.4.6 (Least Functionality) ---")
 
 $smb1 = Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
 if ($null -eq $smb1) {
-    Write-Output "SMBv1: Feature not found on this system"
+    $verificationLines.Add("SMBv1: Feature not found on this system")
 } else {
-    Write-Output "SMBv1: $($smb1.State)"
+    $verificationLines.Add("SMBv1: $($smb1.State)")
 }
 $psv2 = Get-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root
 if ($null -eq $psv2) {
-    Write-Output "PowerShell v2: Feature not found on this system"
+    $verificationLines.Add("PowerShell v2: Feature not found on this system")
 } else {
-    Write-Output "PowerShell v2: $($psv2.State)"
+    $verificationLines.Add("PowerShell v2: $($psv2.State)")
 }
 $telnet = Get-WindowsOptionalFeature -Online -FeatureName TelnetClient
 if ($null -eq $telnet) {
-    Write-Output "Telnet Client: Feature not found on this system"
+    $verificationLines.Add("Telnet Client: Feature not found on this system")
 } else {
-    Write-Output "Telnet Client: $($telnet.State)"
+    $verificationLines.Add("Telnet Client: $($telnet.State)")
 }
 
 $llmnr = Get-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -ErrorAction SilentlyContinue
-Write-Output "LLMNR (0=Disabled): $($llmnr.EnableMulticast)"
+$verificationLines.Add("LLMNR (0=Disabled): $($llmnr.EnableMulticast)")
 
 $netbiosResults = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE"
 $netbiosAllDisabled = $true
@@ -382,24 +388,24 @@ foreach ($adapter in $netbiosResults) {
     if ($adapter.TcpipNetbiosOptions -ne 2) { $netbiosAllDisabled = $false }
 }
 if ($netbiosAllDisabled) {
-    Write-Output "  [PASS] NetBIOS over TCP/IP: Disabled on all adapters"
+    $verificationLines.Add("  [PASS] NetBIOS over TCP/IP: Disabled on all adapters")
 } else {
-    Write-Output "  [FAIL] NetBIOS over TCP/IP: Not disabled on all adapters"
+    $verificationLines.Add("  [FAIL] NetBIOS over TCP/IP: Not disabled on all adapters")
 }
 
 $wpad = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" -Name "WpadOverride" -ErrorAction SilentlyContinue
-Write-Output "WPAD Override (1=Disabled): $($wpad.WpadOverride)"
+$verificationLines.Add("WPAD Override (1=Disabled): $($wpad.WpadOverride)")
 
 #  ===== CM.L2-3.4.7 - Nonessential Programs/Ports/Protocols/Services =====
-Write-Output ""
-Write-Output "--- CM.L2-3.4.7 (Nonessential Programs/Ports/Protocols/Services) ---"
+$verificationLines.Add("")
+$verificationLines.Add("--- CM.L2-3.4.7 (Nonessential Programs/Ports/Protocols/Services) ---")
 
-Write-Output "Firewall Verification:"
+$verificationLines.Add("Firewall Verification:")
 Get-NetFirewallProfile -Profile Domain,Private,Public | ForEach-Object {
-    Write-Output "  $($_.Name): Inbound=$($_.DefaultInboundAction), Logging=$($_.LogAllowed)/$($_.LogBlocked)"
+    $verificationLines.Add("  $($_.Name): Inbound=$($_.DefaultInboundAction), Logging=$($_.LogAllowed)/$($_.LogBlocked)")
 }
 
-Write-Output "Service Verification:"
+$verificationLines.Add("Service Verification:")
 $checkServices = @(
     @{ Name = "RemoteRegistry"; Label = "Remote Registry" },
     @{ Name = "RemoteAccess"; Label = "Remote Access" },
@@ -409,36 +415,36 @@ foreach ($svc in $checkServices) {
     $service = Get-Service -Name $svc.Name -ErrorAction SilentlyContinue
     if ($service) {
         $status = if ($service.StartType -eq "Disabled") { "PASS" } else { "FAIL" }
-        Write-Output "  [$status] $($svc.Label): StartType=$($service.StartType)"
+        $verificationLines.Add("  [$status] $($svc.Label): StartType=$($service.StartType)")
     } else {
-        Write-Output "  [N/A] $($svc.Label): Service not found"
+        $verificationLines.Add("  [N/A] $($svc.Label): Service not found")
     }
 }
 
 $xboxServices = Get-Service *Xbox* -ErrorAction SilentlyContinue
 if ($null -eq $xboxServices) {
-    Write-Output "  [PASS] Xbox services: Not present"
+    $verificationLines.Add("  [PASS] Xbox services: Not present")
 } else {
     $xboxEnabled = $xboxServices | Where-Object { $_.StartType -ne "Disabled" }
     if ($xboxEnabled.Count -eq 0) {
-        Write-Output "  [PASS] Xbox services: All disabled ($($xboxServices.Count) services)"
+        $verificationLines.Add("  [PASS] Xbox services: All disabled ($($xboxServices.Count) services)")
     } else {
-        Write-Output "  [FAIL] Xbox services: $($xboxEnabled.Count) of $($xboxServices.Count) still enabled"
+        $verificationLines.Add("  [FAIL] Xbox services: $($xboxEnabled.Count) of $($xboxServices.Count) still enabled")
     }
 }
 
 $store = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "RemoveWindowsStore" -ErrorAction SilentlyContinue
-Write-Output "Microsoft Store (1=Disabled): $($store.RemoveWindowsStore)"
+$verificationLines.Add("Microsoft Store (1=Disabled): $($store.RemoveWindowsStore)")
 $msi = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" -Name "DisableMSI" -ErrorAction SilentlyContinue
-Write-Output "MSI Restriction (1=SYSTEM-only): $($msi.DisableMSI)"
+$verificationLines.Add("MSI Restriction (1=SYSTEM-only): $($msi.DisableMSI)")
 
 #  ===== AC.L2-3.1.16 - Authorize Wireless Access =====
 #  Mobile Hotspot and Wi-Fi Direct fit here rather than 3.1.17: this control's
 #  discussion explicitly calls for disabling wireless capabilities not intended
 #  for use. 3.1.17 is about how PacRim's own wireless network is configured
 #  (authentication/encryption), not endpoint-side blocking.
-Write-Output ""
-Write-Output "--- AC.L2-3.1.16 (Authorize Wireless Access) ---"
+$verificationLines.Add("")
+$verificationLines.Add("--- AC.L2-3.1.16 (Authorize Wireless Access) ---")
 
 $wirelessServices = @(
     @{ Name = "SharedAccess"; Label = "Mobile Hotspot (ICS)" },
@@ -448,26 +454,34 @@ foreach ($svc in $wirelessServices) {
     $service = Get-Service -Name $svc.Name -ErrorAction SilentlyContinue
     if ($service) {
         $status = if ($service.StartType -eq "Disabled") { "PASS" } else { "FAIL" }
-        Write-Output "  [$status] $($svc.Label): StartType=$($service.StartType)"
+        $verificationLines.Add("  [$status] $($svc.Label): StartType=$($service.StartType)")
     } else {
-        Write-Output "  [N/A] $($svc.Label): Service not found"
+        $verificationLines.Add("  [N/A] $($svc.Label): Service not found")
     }
 }
 
 #  ===== General Hardening - not tied to a specific cited control =====
-Write-Output ""
-Write-Output "--- General Hardening (no specific control citation) ---"
+$verificationLines.Add("")
+$verificationLines.Add("--- General Hardening (no specific control citation) ---")
 
 #  SMB Signing (client only - see hardening section note)
 $smbClient = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" -Name "RequireSecuritySignature" -ErrorAction SilentlyContinue
 if ($smbClient.RequireSecuritySignature -eq 1) {
-    Write-Output "  [PASS] SMB Signing (Client): Enforced"
+    $verificationLines.Add("  [PASS] SMB Signing (Client): Enforced")
 } else {
-    Write-Output "  [FAIL] SMB Signing (Client): Not enforced (value: $($smbClient.RequireSecuritySignature))"
+    $verificationLines.Add("  [FAIL] SMB Signing (Client): Not enforced (value: $($smbClient.RequireSecuritySignature))")
 }
+
+$verificationOutput = $verificationLines -join "`r`n"
+Write-Output $verificationOutput
 
 Write-Output "**********************"
 Write-Output "PacRim Baseline Hardening Script Complete"
 Write-Output "**********************"
+
+#  ImmyBot detection marker - existence check confirms the script has run.
+#  Now also contains the verification results above, not just an empty file.
+$verificationOutput | Out-File "$ENV:ProgramData\Automation\Logs\Win11Tweaks-CMMC-Applied.txt" -Encoding UTF8 -Force
+Write-Output "Win11Tweaks-CMMC have been applied"
 
 Stop-Transcript
