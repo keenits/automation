@@ -27,7 +27,10 @@ function Test-CMMCCompliance {
     $lines.Add($Label)
     $lines.Add("**********************")
 
-    #  Windows features
+    #  ===== CM.L2-3.4.6 - Least Functionality =====
+    $lines.Add("")
+    $lines.Add("--- CM.L2-3.4.6 (Least Functionality) ---")
+
     $smb1 = Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
     if ($null -eq $smb1) {
         $lines.Add("SMBv1: Feature not found on this system")
@@ -47,11 +50,9 @@ function Test-CMMCCompliance {
         $lines.Add("Telnet Client: $($telnet.State)")
     }
 
-    #  LLMNR
     $llmnr = Get-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -ErrorAction SilentlyContinue
     $lines.Add("LLMNR (0=Disabled): $($llmnr.EnableMulticast)")
 
-    #  NetBIOS over TCP/IP
     $netbiosResults = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE"
     $netbiosAllDisabled = $true
     foreach ($adapter in $netbiosResults) {
@@ -63,38 +64,23 @@ function Test-CMMCCompliance {
         $lines.Add("  [FAIL] NetBIOS over TCP/IP: Not disabled on all adapters")
     }
 
-    #  WPAD
     $wpad = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" -Name "WpadOverride" -ErrorAction SilentlyContinue
     $lines.Add("WPAD Override (1=Disabled): $($wpad.WpadOverride)")
 
-    #  SMB Signing
-    $smbServer = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Name "RequireSecuritySignature" -ErrorAction SilentlyContinue
-    $smbClient = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" -Name "RequireSecuritySignature" -ErrorAction SilentlyContinue
-    if ($smbServer.RequireSecuritySignature -eq 1) {
-        $lines.Add("  [PASS] SMB Signing (Server): Enforced")
-    } else {
-        $lines.Add("  [FAIL] SMB Signing (Server): Not enforced (value: $($smbServer.RequireSecuritySignature))")
-    }
-    if ($smbClient.RequireSecuritySignature -eq 1) {
-        $lines.Add("  [PASS] SMB Signing (Client): Enforced")
-    } else {
-        $lines.Add("  [FAIL] SMB Signing (Client): Not enforced (value: $($smbClient.RequireSecuritySignature))")
-    }
+    #  ===== CM.L2-3.4.7 - Nonessential Programs/Ports/Protocols/Services =====
+    $lines.Add("")
+    $lines.Add("--- CM.L2-3.4.7 (Nonessential Programs/Ports/Protocols/Services) ---")
 
-    #  Firewall
     $lines.Add("Firewall Verification:")
     Get-NetFirewallProfile -Profile Domain,Private,Public | ForEach-Object {
         $lines.Add("  $($_.Name): Inbound=$($_.DefaultInboundAction), Logging=$($_.LogAllowed)/$($_.LogBlocked)")
     }
 
-    #  Services
     $lines.Add("Service Verification:")
     $checkServices = @(
         @{ Name = "RemoteRegistry"; Label = "Remote Registry" },
         @{ Name = "RemoteAccess"; Label = "Remote Access" },
-        @{ Name = "Fax"; Label = "Fax" },
-        @{ Name = "SharedAccess"; Label = "Mobile Hotspot (ICS)" },
-        @{ Name = "WFDSConMgrSvc"; Label = "Wi-Fi Direct" }
+        @{ Name = "Fax"; Label = "Fax" }
     )
     foreach ($svc in $checkServices) {
         $service = Get-Service -Name $svc.Name -ErrorAction SilentlyContinue
@@ -106,7 +92,6 @@ function Test-CMMCCompliance {
         }
     }
 
-    #  Xbox services (dynamic - names vary by build, so checked as a group)
     $xboxServices = Get-Service *Xbox* -ErrorAction SilentlyContinue
     if ($null -eq $xboxServices) {
         $lines.Add("  [PASS] Xbox services: Not present")
@@ -119,11 +104,44 @@ function Test-CMMCCompliance {
         }
     }
 
-    #  Program restrictions
     $store = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "RemoveWindowsStore" -ErrorAction SilentlyContinue
     $lines.Add("Microsoft Store (1=Disabled): $($store.RemoveWindowsStore)")
     $msi = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" -Name "DisableMSI" -ErrorAction SilentlyContinue
     $lines.Add("MSI Restriction (1=SYSTEM-only): $($msi.DisableMSI)")
+
+    #  ===== AC.L2-3.1.16 - Authorize Wireless Access =====
+    #  Mobile Hotspot and Wi-Fi Direct fit here rather than 3.1.17: this control's
+    #  discussion explicitly calls for disabling wireless capabilities not intended
+    #  for use. 3.1.17 is about how PacRim's own wireless network is configured
+    #  (authentication/encryption), not endpoint-side blocking.
+    $lines.Add("")
+    $lines.Add("--- AC.L2-3.1.16 (Authorize Wireless Access) ---")
+
+    $wirelessServices = @(
+        @{ Name = "SharedAccess"; Label = "Mobile Hotspot (ICS)" },
+        @{ Name = "WFDSConMgrSvc"; Label = "Wi-Fi Direct" }
+    )
+    foreach ($svc in $wirelessServices) {
+        $service = Get-Service -Name $svc.Name -ErrorAction SilentlyContinue
+        if ($service) {
+            $status = if ($service.StartType -eq "Disabled") { "PASS" } else { "FAIL" }
+            $lines.Add("  [$status] $($svc.Label): StartType=$($service.StartType)")
+        } else {
+            $lines.Add("  [N/A] $($svc.Label): Service not found")
+        }
+    }
+
+    #  ===== General Hardening - not tied to a specific cited control =====
+    $lines.Add("")
+    $lines.Add("--- General Hardening (no specific control citation) ---")
+
+    #  SMB Signing (client only - see hardening section note)
+    $smbClient = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" -Name "RequireSecuritySignature" -ErrorAction SilentlyContinue
+    if ($smbClient.RequireSecuritySignature -eq 1) {
+        $lines.Add("  [PASS] SMB Signing (Client): Enforced")
+    } else {
+        $lines.Add("  [FAIL] SMB Signing (Client): Not enforced (value: $($smbClient.RequireSecuritySignature))")
+    }
 
     $result = $lines -join "`r`n"
     return $result
@@ -188,13 +206,12 @@ If (!(Test-Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settin
 }
 Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" -Name "WpadOverride" -Type DWord -Value 1
 
-#  Enforce SMB signing (server + client)
-#  Both sides must be set to Always - server-only breaks share access, client set to
-#  "if server agrees" still gets flagged by scans. Confirmed both-sides-Always clears
-#  the scan finding and keeps share access working.
-
-Write-Output "Enforcing SMB signing (server)..."
-reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v RequireSecuritySignature /t REG_DWORD /d 1 /f | Out-Null
+#  Enforce SMB signing (client only)
+#  Server-side signing was removed - most PacRim endpoints are SMB clients only
+#  and don't host shares, so there's no reason to force it fleet-wide. The
+#  license workstation (hosts the BSI share) needs server-side signing handled
+#  separately, along with its documented firewall exception, since forcing it
+#  broadly previously broke share access on machines that do act as servers.
 
 Write-Output "Enforcing SMB signing (client)..."
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v RequireSecuritySignature /t REG_DWORD /d 1 /f | Out-Null
