@@ -7,6 +7,7 @@ Write-Output "**********************"
 
 #  SECURITY HARDENING
 
+#  CM.L2-3.4.6
 #  Disable legacy/insecure Windows features
 
 Write-Output "Disabling SMBv1..."
@@ -56,6 +57,7 @@ If (!(Test-Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settin
 }
 Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" -Name "WpadOverride" -Type DWord -Value 1
 
+#  General Hardening (no specific control citation)
 #  Enforce SMB signing (client only)
 #  Server-side signing was removed - most PacRim endpoints are SMB clients only
 #  and don't host shares, so there's no reason to force it fleet-wide. The
@@ -66,6 +68,7 @@ Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet
 Write-Output "Enforcing SMB signing (client)..."
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v RequireSecuritySignature /t REG_DWORD /d 1 /f | Out-Null
 
+#  CM.L2-3.4.6
 #  Microsoft Defender ASR Rules
 #  Not applied - SentinelOne is the active AV/EDR and provides equivalent
 #  behavioral protection via its own policy engine. ASR requires Defender
@@ -85,6 +88,7 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v
 # }
 # $ErrorActionPreference = 'SilentlyContinue'
 
+#  CM.L2-3.4.7
 #  FIREWALL HARDENING
 
 #  Set inbound default to Block on all profiles
@@ -175,6 +179,7 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Delivery
 Write-Output "Disabling automatic setup of network connected devices..."
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup\Private" /v AutoSetup /t REG_DWORD /d 0 /f | Out-Null
 
+#  AC.L2-3.1.16
 #  WIRELESS SECURITY
 
 #  Block open/WEP wireless networks - NOT IMPLEMENTED
@@ -222,6 +227,7 @@ Set-Service "dmwappushservice" -StartupType Disabled
 Write-Output "Disabling Remote Assistance..."
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance" -Name "fAllowToGetHelp" -Type DWord -Value 0
 
+#  CM.L2-3.4.7
 #  Disable nonessential services
 
 Write-Output "Disabling nonessential services (RemoteRegistry, RemoteAccess, Fax)..."
@@ -319,6 +325,7 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v HideRecentlyAdded
 Write-Output "Disabling Windows Store auto-download..."
 reg add "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /t REG_DWORD /d 2 /f | Out-Null
 
+#  CM.L2-3.4.7
 #  PROGRAM RESTRICTIONS
 
 #  Disable Microsoft Store
