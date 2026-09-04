@@ -1,91 +1,11 @@
+$Method = "Set"
+
 $ErrorActionPreference = 'SilentlyContinue'
 
-Start-Transcript $ENV:ProgramData\Automation\Logs\Win11Tweaks-CMMC-transcript.txt
-Write-Output "PacRim Baseline Hardening Script"
-
-#  SECURITY HARDENING
-
-#  Disable legacy/insecure Windows features
-
-Write-Output "Disabling SMBv1..."
-try {
-    Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart -ErrorAction Stop
-    Write-Output "  SMBv1 disabled successfully."
-} catch {
-    Write-Output "  SMBv1: $($_.Exception.Message)"
-}
-
-Write-Output "Disabling PowerShell v2..."
-try {
-    Disable-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root -NoRestart -ErrorAction Stop
-    Write-Output "  PowerShell v2 disabled successfully."
-} catch {
-    Write-Output "  PowerShell v2: $($_.Exception.Message)"
-}
-
-Write-Output "Disabling Telnet Client..."
-try {
-    Disable-WindowsOptionalFeature -Online -FeatureName TelnetClient -NoRestart -ErrorAction Stop
-    Write-Output "  Telnet Client disabled successfully."
-} catch {
-    Write-Output "  Telnet Client: $($_.Exception.Message)"
-}
-
-#  Disable LLMNR
-
-Write-Output "Disabling LLMNR..."
-If (!(Test-Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient")) {
-    New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -Type DWord -Value 0
-
-#  Disable NetBIOS over TCP/IP
-
-Write-Output "Disabling NetBIOS over TCP/IP..."
-Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE" | ForEach-Object {
-    Invoke-CimMethod -InputObject $_ -MethodName SetTcpipNetbios -Arguments @{ TcpipNetbiosOptions = [uint32]2 } | Out-Null
-}
-
-#  Disable WPAD
-
-Write-Output "Disabling WPAD..."
-If (!(Test-Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad")) {
-    New-Item -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" -Name "WpadOverride" -Type DWord -Value 1
-
-#  Microsoft Defender ASR Rules
-#  Skipping for now - needs Defender active, fails silently on SentinelOne (0x800106ba)
-# $ErrorActionPreference = 'Continue'
-# Write-Output "Enabling Defender Attack Surface Reduction rules..."
-# $ASRRules = @{
-#     "D4F940AB-401B-4EFC-AADC-AD5F3C50688A" = 1  # Block Office apps creating child processes
-#     "3B576869-A4EC-4529-8536-B80A7769E899" = 1  # Block credential stealing from LSASS
-#     "BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550" = 1  # Block executable content from email/webmail
-#     "D3E037E1-3EB8-44C8-A917-57927947596D" = 1  # Block JavaScript/VBScript launching executables
-#     "5BEB7EFE-FD9A-4556-801D-275E5FFC04CC" = 1  # Block obfuscated scripts
-# }
-# foreach ($rule in $ASRRules.GetEnumerator()) {
-#     Add-MpPreference -AttackSurfaceReductionRules_Ids $rule.Key `
-#                      -AttackSurfaceReductionRules_Actions $rule.Value
-# }
-# $ErrorActionPreference = 'SilentlyContinue'
-
-#  FIREWALL HARDENING
-
-#  Set inbound default to Block on all profiles
-#  Automate/ScreenConnect/S1/Zorus are all outbound only, no inbound ports needed
-Write-Output "Setting firewall inbound default to Block on all profiles..."
-Set-NetFirewallProfile -Profile Domain,Private,Public -DefaultInboundAction Block -DefaultOutboundAction Allow -Enabled True
-
-#  Enable firewall logging
-
-Write-Output "Enabling firewall logging..."
-Set-NetFirewallProfile -Profile Domain,Private,Public `
-    -LogFileName "C:\Windows\System32\LogFiles\Firewall\pfirewall.log" `
-    -LogMaxSizeKilobytes 16384 `
-    -LogAllowed True `
-    -LogBlocked True
+Start-Transcript $ENV:ProgramData\Automation\Logs\Win11Tweaks-transcript.txt
+Write-Output "**********************"
+Write-Output "PacRim Windows 11 Baseline Script"
+Write-Output "**********************"
 
 # PRIVACY AND TELEMETRY
 
@@ -140,8 +60,9 @@ Disable-ScheduledTask -TaskName "Microsoft\Windows\Feedback\Siuf\DmClientOnScena
 
 # First Logon
 
-Write-Output "Disabling first logon privacy settings..."
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f | Out-Null
+# Redundant with ImmyBot PPKG onboarding, which already controls OOBE. Commented out.
+# Write-Output "Disabling first logon privacy settings..."
+# reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f | Out-Null
 Write-Output "Disabling first logon animation..."
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableFirstLogonAnimation /t REG_DWORD /d 0 /f | Out-Null
 
@@ -160,26 +81,22 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Delivery
 Write-Output "Disabling automatic setup of network connected devices..."
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup\Private" /v AutoSetup /t REG_DWORD /d 0 /f | Out-Null
 
-#  WIRELESS SECURITY
+# NIC Settings
 
-#  Block insecure wireless network types
+Write-Output "Disabling IPv6..."
+Get-NetAdapterBinding -ComponentID ms_tcpip6 | Disable-NetAdapterBinding -ComponentID ms_tcpip6
 
-Write-Output "Blocking open wireless networks..."
-netsh wlan add filter permission=block networktype=infrastructure ssid="" matchtype=wildcard security=open | Out-Null
+Write-Output "Disabling LMHOSTS Lookup..."
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "EnableLMHOSTS" -Value 0
 
-Write-Output "Blocking WEP wireless networks..."
-netsh wlan add filter permission=block networktype=infrastructure ssid="" matchtype=wildcard security=wep | Out-Null
-
-#  Disable Mobile Hotspot
-Write-Output "Disabling Mobile Hotspot (Internet Connection Sharing)..."
-Stop-Service "SharedAccess" -Force -WarningAction SilentlyContinue
-Set-Service "SharedAccess" -StartupType Disabled
-
-#  Disable Wi-Fi Direct
-#  also kills Miracast/wireless display if that's in use anywhere
-Write-Output "Disabling Wi-Fi Direct Services..."
-Stop-Service "WFDSConMgrSvc" -Force -WarningAction SilentlyContinue
-Set-Service "WFDSConMgrSvc" -StartupType Disabled
+Write-Output "Disabling NetBIOS over TCP/IP..."
+# PacRim-specific: disabled (2), not enabled (1) like the generic baseline.
+# Matches what the CMMC script also enforces for this client, so this is
+# correct independent of which script runs first or whether CMMC ever runs
+# again on this machine without the baseline preceding it.
+Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE" | ForEach-Object {
+    Invoke-CimMethod -InputObject $_ -MethodName SetTcpipNetbios -Arguments @{ TcpipNetbiosOptions = [uint32]2 } | Out-Null
+}
 
 # EDGE BROWSER
 
@@ -203,20 +120,15 @@ Set-Service "dmwappushservice" -StartupType Disabled
 Write-Output "Disabling Remote Assistance..."
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance" -Name "fAllowToGetHelp" -Type DWord -Value 0
 
-#  Disable nonessential services
-
-Write-Output "Disabling nonessential services (RemoteRegistry, RemoteAccess, Fax)..."
-$disableServices = @("RemoteRegistry", "RemoteAccess", "Fax")
-foreach ($svc in $disableServices) {
-    Stop-Service -Name $svc -Force -WarningAction SilentlyContinue
-    Set-Service -Name $svc -StartupType Disabled
-}
-
-Write-Output "Disabling Xbox services..."
-Get-Service *Xbox* | ForEach-Object {
-    Stop-Service -Name $_.Name -Force -WarningAction SilentlyContinue
-    Set-Service -Name $_.Name -StartupType Disabled
-}
+# Superfetch/SysMain disable - kept for reference but not applied by default.
+# This was common advice in the early SSD era when Superfetch's caching behavior
+# wasn't well suited to solid-state drives. Microsoft has since reworked SysMain
+# for modern NVMe/SSD hardware, and it's re-enabled by default for a reason -
+# it helps with app-launch prediction and memory management. Leave commented
+# out unless a specific machine shows a real issue tied to this service.
+# Write-Output "Stopping and disabling Superfetch service..."
+# Stop-Service "SysMain" -WarningAction SilentlyContinue
+# Set-Service "SysMain" -StartupType Disabled
 
 # POWER AND SLEEP
 
@@ -272,10 +184,20 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v NoCo
 Write-Output "Disabling automatic Maps updates..."
 Set-ItemProperty -Path "HKLM:\SYSTEM\Maps" -Name "AutoUpdateEnabled" -Type DWord -Value 0
 
+# Drive Letters
+
+Write-Output "Remapping first optical drive to Z: (if present)..."
+Get-CimInstance -ClassName Win32_Volume -Filter 'DriveType=5' | Select-Object -First 1 | Set-CimInstance -Arguments @{DriveLetter="Z:"}
+
 # System Drive
 
 Write-Output "Renaming system drive..."
 Set-Volume -DriveLetter C -NewFileSystemLabel "Windows"
+
+# Boot Menu
+
+Write-Output "Enabling F8 boot menu options..."
+bcdedit /set `{current`} bootmenupolicy Legacy | Out-Null
 
 # UX CLEANUP
 
@@ -300,48 +222,6 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v HideRecentlyAdded
 Write-Output "Disabling Windows Store auto-download..."
 reg add "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /t REG_DWORD /d 2 /f | Out-Null
 
-#  PROGRAM RESTRICTIONS
-
-#  Disable Microsoft Store
-
-Write-Output "Disabling Microsoft Store..."
-reg add "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v RemoveWindowsStore /t REG_DWORD /d 1 /f | Out-Null
-
-#  Restrict MSI installs to SYSTEM-context only
-#  blocks user-run MSI installs, SYSTEM context (Automate/ImmyBot) still works
-Write-Output "Restricting MSI installs to SYSTEM-context..."
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer" /v DisableMSI /t REG_DWORD /d 1 /f | Out-Null
-
-#  Disable AutoRun/AutoPlay
-Write-Output "Disabling AutoRun on all drive types..."
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoDriveTypeAutoRun /t REG_DWORD /d 255 /f | Out-Null
-
-Write-Output "Disabling AutoPlay..."
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 1 /f | Out-Null
-
-#  Remove built-in consumer apps
-#  adjust list as needed
-Write-Output "Removing built-in consumer apps..."
-$removeApps = @(
-    "Clipchamp.Clipchamp"
-    "Microsoft.BingNews"
-    "Microsoft.BingWeather"
-    "Microsoft.GamingApp"
-    "Microsoft.Getstarted"
-    "Microsoft.MicrosoftSolitaireCollection"
-    "Microsoft.People"
-    "Microsoft.WindowsFeedbackHub"
-    "Microsoft.XboxGameOverlay"
-    "Microsoft.XboxGamingOverlay"
-    "Microsoft.XboxIdentityProvider"
-    "Microsoft.XboxSpeechToTextOverlay"
-    "Microsoft.ZuneVideo"
-)
-foreach ($app in $removeApps) {
-    Get-AppxPackage -AllUsers -Name $app | Remove-AppxPackage -AllUsers
-    Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq $app } | Remove-AppxProvisionedPackage -Online
-}
-
 # DEFAULT APP ASSOCIATIONS
 
 Write-Output "Configuring default app associations..."
@@ -355,96 +235,14 @@ Dism /online /import-defaultappassociations:C:\Windows\System32\defaultassociati
 Write-Output "Resizing Shadow Storage..."
 vssadmin resize shadowstorage /for=C: /on=C: /maxsize=5%
 
-#  VERIFICATION
-
 Write-Output "**********************"
-Write-Output "Verification Results"
+Write-Output "PacRim Windows 11 Baseline Script Complete"
 Write-Output "**********************"
 
-#  Windows features
-$smb1 = Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
-Write-Output "SMBv1: $($smb1.State)"
-$psv2 = Get-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root
-Write-Output "PowerShell v2: $($psv2.State)"
-$telnet = Get-WindowsOptionalFeature -Online -FeatureName TelnetClient
-Write-Output "Telnet Client: $($telnet.State)"
-
-#  LLMNR
-$llmnr = Get-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -ErrorAction SilentlyContinue
-Write-Output "LLMNR (0=Disabled): $($llmnr.EnableMulticast)"
-
-#  WPAD
-$wpad = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" -Name "WpadOverride" -ErrorAction SilentlyContinue
-Write-Output "WPAD Override (1=Disabled): $($wpad.WpadOverride)"
-
-#  Firewall
-Write-Output "Firewall Verification:"
-Get-NetFirewallProfile -Profile Domain,Private,Public | ForEach-Object {
-    Write-Output "  $($_.Name): Inbound=$($_.DefaultInboundAction), Logging=$($_.LogAllowed)/$($_.LogBlocked)"
-}
-
-#  Services
-Write-Output "Service Verification:"
-$checkServices = @(
-    @{ Name = "RemoteRegistry"; Label = "Remote Registry" },
-    @{ Name = "RemoteAccess"; Label = "Remote Access" },
-    @{ Name = "Fax"; Label = "Fax" },
-    @{ Name = "SharedAccess"; Label = "Mobile Hotspot (ICS)" },
-    @{ Name = "WFDSConMgrSvc"; Label = "Wi-Fi Direct" }
-)
-foreach ($svc in $checkServices) {
-    $service = Get-Service -Name $svc.Name -ErrorAction SilentlyContinue
-    if ($service) {
-        $status = if ($service.StartType -eq "Disabled") { "PASS" } else { "FAIL" }
-        Write-Output "  [$status] $($svc.Label): StartType=$($service.StartType)"
-    } else {
-        Write-Output "  [N/A] $($svc.Label): Service not found"
-    }
-}
-
-#  Program restrictions
-$store = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "RemoveWindowsStore" -ErrorAction SilentlyContinue
-Write-Output "Microsoft Store (1=Disabled): $($store.RemoveWindowsStore)"
-$msi = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" -Name "DisableMSI" -ErrorAction SilentlyContinue
-Write-Output "MSI Restriction (1=SYSTEM-only): $($msi.DisableMSI)"
-$autorun = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "NoDriveTypeAutoRun" -ErrorAction SilentlyContinue
-Write-Output "AutoRun (255=All disabled): $($autorun.NoDriveTypeAutoRun)"
-
-#  Wireless filters
-Write-Output "Wireless Filter Verification:"
-$wlanFilters = netsh wlan show filters 2>&1
-if ($wlanFilters -match "open") {
-    Write-Output "  [PASS] Open network block filter present"
-} else {
-    Write-Output "  [FAIL] Open network block filter not found"
-}
-if ($wlanFilters -match "wep") {
-    Write-Output "  [PASS] WEP network block filter present"
-} else {
-    Write-Output "  [FAIL] WEP network block filter not found"
-}
-
-#  ASR Rules (tabled, see hardening section)
-# Write-Output "ASR Rule Verification:"
-# $asrLabels = @{
-#     "D4F940AB-401B-4EFC-AADC-AD5F3C50688A" = "Block Office child processes"
-#     "3B576869-A4EC-4529-8536-B80A7769E899" = "Block LSASS credential theft"
-#     "BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550" = "Block email executable content"
-#     "D3E037E1-3EB8-44C8-A917-57927947596D" = "Block JS/VBS launching executables"
-#     "5BEB7EFE-FD9A-4556-801D-275E5FFC04CC" = "Block obfuscated scripts"
-# }
-# $asr = Get-MpPreference
-# foreach ($expected in $asrLabels.GetEnumerator()) {
-#     $index = [Array]::IndexOf($asr.AttackSurfaceReductionRules_Ids, $expected.Key)
-#     if ($index -ge 0 -and $asr.AttackSurfaceReductionRules_Actions[$index] -eq 1) {
-#         Write-Output "  [PASS] $($expected.Value)"
-#     } elseif ($index -ge 0) {
-#         Write-Output "  [FAIL] $($expected.Value) - Action is $($asr.AttackSurfaceReductionRules_Actions[$index]), expected 1 (Enforce)"
-#     } else {
-#         Write-Output "  [FAIL] $($expected.Value) - Not configured"
-#     }
-# }
-New-Item -Path "$ENV:ProgramData\Automation\Logs\Win11Tweaks-CMMC-Applied.txt" -ItemType File
-Write-Output "Win11Tweaks-CMMC have been applied"
+# ImmyBot detection marker - written only if the script reaches this final line
+# without a fatal interruption. Not a per-setting success check, but does rule
+# out a hard crash partway through.
+New-Item -Path "$ENV:ProgramData\Automation\Logs\Win11Tweaks-Verification.txt" -ItemType File -Force | Out-Null
+Write-Output "Win11 Baseline have been applied"
 
 Stop-Transcript
