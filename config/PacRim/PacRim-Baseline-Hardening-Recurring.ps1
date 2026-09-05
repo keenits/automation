@@ -1,14 +1,19 @@
+$Method = "Set"
+
 $ErrorActionPreference = 'SilentlyContinue'
 
-Start-Transcript $ENV:ProgramData\Automation\Logs\PacRim-Baseline-Hardening-Recurring-transcript.txt
+Start-Transcript $ENV:ProgramData\Automation\Logs\PacRim-CMMC-transcript.txt
 Write-Output "**********************"
-Write-Output "PacRim Baseline Hardening Script - Recurring"
+Write-Output "PacRim CMMC Script"
 Write-Output "**********************"
 
 #  Timestamped archive folder for this run's Pre/Post check output. The fixed-path
 #  files (PacRim-Recurring-PreCheck.txt / PostCheck.txt) are still written for
 #  Automate to read reliably; this folder keeps a dated copy of each run for
 #  historical reference.
+#  NOTE: kept the "Recurring" naming on these specific paths since Automate may
+#  already be configured to read them. Rename only if you also update the
+#  Automate script's file-read steps to match.
 $runTimestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
 $archiveFolder = "C:\ProgramData\Automation\Logs\PacRim-Recurring-History\$runTimestamp"
 New-Item -Path $archiveFolder -ItemType Directory -Force | Out-Null
@@ -129,6 +134,25 @@ function Test-CMMCCompliance {
         } else {
             $lines.Add("  [N/A] $($svc.Label): Service not found")
         }
+    }
+
+    #  ===== IA.L2-3.5.8 - Password Reuse =====
+    $lines.Add("")
+    $lines.Add("--- IA.L2-3.5.8 (Password Reuse) ---")
+
+    $netAccountsOutput = net accounts
+    $historyLine = $netAccountsOutput | Where-Object { $_ -match "password history" }
+    if ($historyLine -match '(\d+)') {
+        $currentHistoryValue = $matches[1]
+        if ($currentHistoryValue -eq "24") {
+            $lines.Add("  [PASS] Password History: $currentHistoryValue passwords remembered")
+        } else {
+            $lines.Add("  [FAIL] Password History: $currentHistoryValue passwords remembered (expected 24)")
+        }
+    } elseif ($historyLine -match "None") {
+        $lines.Add("  [FAIL] Password History: None (expected 24)")
+    } else {
+        $lines.Add("  [FAIL] Password History: Could not determine current value")
     }
 
     #  ===== General Hardening - not tied to a specific cited control =====
@@ -255,80 +279,6 @@ Set-NetFirewallProfile -Profile Domain,Private,Public `
     -LogAllowed True `
     -LogBlocked True
 
-# PRIVACY AND TELEMETRY
-
-# Activity History
-
-Write-Output "Disabling Activity History..."
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableActivityFeed" -Type DWord -Value 0
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "PublishUserActivities" -Type DWord -Value 0
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "UploadUserActivities" -Type DWord -Value 0
-
-# Advertising
-
-Write-Output "Disabling Advertising ID..."
-If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" -Name "DisabledByGroupPolicy" -Type DWord -Value 1
-
-# Application Suggestions
-
-Write-Output "Disabling Application suggestions..."
-If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableWindowsConsumerFeatures" -Type DWord -Value 1
-
-# Telemetry
-
-Write-Output "Disabling Telemetry..."
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0
-Disable-ScheduledTask -TaskName "Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser" | Out-Null
-Disable-ScheduledTask -TaskName "Microsoft\Windows\Application Experience\ProgramDataUpdater" | Out-Null
-Disable-ScheduledTask -TaskName "Microsoft\Windows\Autochk\Proxy" | Out-Null
-Disable-ScheduledTask -TaskName "Microsoft\Windows\Customer Experience Improvement Program\Consolidator" | Out-Null
-Disable-ScheduledTask -TaskName "Microsoft\Windows\Customer Experience Improvement Program\UsbCeip" | Out-Null
-Disable-ScheduledTask -TaskName "Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector" | Out-Null
-
-# Error Reporting
-
-Write-Output "Disabling Error reporting..."
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting" -Name "Disabled" -Type DWord -Value 1
-Disable-ScheduledTask -TaskName "Microsoft\Windows\Windows Error Reporting\QueueReporting" | Out-Null
-
-# Feedback
-
-Write-Output "Disabling Feedback..."
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DoNotShowFeedbackNotifications" -Type DWord -Value 1
-Disable-ScheduledTask -TaskName "Microsoft\Windows\Feedback\Siuf\DmClient" -ErrorAction SilentlyContinue | Out-Null
-Disable-ScheduledTask -TaskName "Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload" -ErrorAction SilentlyContinue | Out-Null
-
-# First Logon
-
-# Redundant with ImmyBot PPKG onboarding, which already controls OOBE. Commented out.
-# Write-Output "Disabling first logon privacy settings..."
-# reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f | Out-Null
-Write-Output "Disabling first logon animation..."
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableFirstLogonAnimation /t REG_DWORD /d 0 /f | Out-Null
-
-# NETWORKING
-
-# Windows Update Delivery Optimization
-
-Write-Output "Restricting Windows Update P2P only to local network..."
-If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -Type DWord -Value 1
-
-# Network Connected Devices
-
-Write-Output "Disabling automatic setup of network connected devices..."
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup\Private" /v AutoSetup /t REG_DWORD /d 0 /f | Out-Null
-
 #  AC.L2-3.1.16
 #  WIRELESS SECURITY
 
@@ -355,27 +305,17 @@ Write-Output "Disabling Wi-Fi Direct Services..."
 Stop-Service "WFDSConMgrSvc" -Force -WarningAction SilentlyContinue
 Set-Service "WFDSConMgrSvc" -StartupType Disabled
 
-# EDGE BROWSER
+#  IA.L2-3.5.8
+#  IDENTIFICATION AND AUTHENTICATION
 
-Write-Output "Configuring Edge settings..."
-reg add "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /v CreateDesktopShortcutDefault /t REG_DWORD /d 0 /f | Out-Null
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge\StartupBoost" /v StartupBoostEnabled /t REG_DWORD /d 0 /f | Out-Null
-reg add "HKLM\SOFTWARE\Microsoft\Edge" /v HideFirstRunExperience /t REG_DWORD /d 1 /f | Out-Null
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v HideFirstRunExperience /t REG_DWORD /d 1 /f | Out-Null
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge\TabPreloader" /v Enabled /t REG_DWORD /d 0 /f | Out-Null
-
-# SERVICES
-
-Write-Output "Stopping and disabling Diagnostics Tracking Service..."
-Stop-Service "DiagTrack" -WarningAction SilentlyContinue
-Set-Service "DiagTrack" -StartupType Disabled
-
-Write-Output "Stopping and disabling WAP Push Service..."
-Stop-Service "dmwappushservice" -WarningAction SilentlyContinue
-Set-Service "dmwappushservice" -StartupType Disabled
-
-Write-Output "Disabling Remote Assistance..."
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance" -Name "fAllowToGetHelp" -Type DWord -Value 0
+#  Enforce password history (reuse prevention)
+#  PacRim endpoints are workgroup/local-account only, no AD/Entra join, so this
+#  is set via net accounts rather than a domain GPO. Applies machine-wide to
+#  all local accounts, including ones created after this runs. Idempotent -
+#  safe to reapply every run, does not force any password reset or disrupt
+#  users, it just re-affirms the policy.
+Write-Output "Setting password history to prevent reuse of last 24 passwords..."
+net accounts /uniquepw:24 | Out-Null
 
 #  CM.L2-3.4.7
 #  Disable nonessential services
@@ -393,35 +333,6 @@ Get-Service *Xbox* | ForEach-Object {
     Set-Service -Name $_.Name -StartupType Disabled
 }
 
-# SYSTEM CONFIGURATION
-
-# Timezone
-
-Write-Output "Setting automatic timezone detection..."
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\tzautoupdate" -Name "Start" -Type DWord -Value 2
-
-# Microsoft Accounts
-
-Write-Output "Disabling the use of Microsoft accounts..."
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v NoConnectedUser /d 3 /t REG_DWORD /f | Out-Null
-
-# Map Updates
-
-Write-Output "Disabling automatic Maps updates..."
-Set-ItemProperty -Path "HKLM:\SYSTEM\Maps" -Name "AutoUpdateEnabled" -Type DWord -Value 0
-
-# UX CLEANUP
-
-# Start Menu
-
-Write-Output "Disabling recently added apps on start menu..."
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v HideRecentlyAddedApps /t REG_DWORD /d 1 /f | Out-Null
-
-# Store Apps
-
-Write-Output "Disabling Windows Store auto-download..."
-reg add "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /t REG_DWORD /d 2 /f | Out-Null
-
 #  CM.L2-3.4.7
 #  PROGRAM RESTRICTIONS
 
@@ -435,11 +346,6 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v RemoveWindowsStore /t
 Write-Output "Restricting MSI installs to SYSTEM-context..."
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer" /v DisableMSI /t REG_DWORD /d 1 /f | Out-Null
 
-# SYSTEM MAINTENANCE
-
-Write-Output "Resizing Shadow Storage..."
-vssadmin resize shadowstorage /for=C: /on=C: /maxsize=5%
-
 $postCheckOutput = Test-CMMCCompliance -Label "POST-CHECK (After Changes)"
 Write-Output $postCheckOutput
 
@@ -449,7 +355,14 @@ $postCheckOutput | Out-File "C:\ProgramData\Automation\Logs\PacRim-Recurring-Pos
 $postCheckOutput | Out-File "$archiveFolder\PostCheck.txt" -Encoding UTF8 -Force
 
 Write-Output "**********************"
-Write-Output "PacRim Baseline Hardening Script - Recurring Complete"
+Write-Output "PacRim CMMC Script Complete"
 Write-Output "**********************"
+
+#  ImmyBot detection marker - existence check confirms this ran. Contains the
+#  post-check verification results, not just an empty file. Same marker
+#  filename the old onboarding-only script used, so no change needed on the
+#  ImmyBot detection side.
+$postCheckOutput | Out-File "$ENV:ProgramData\Automation\Logs\Win11Tweaks-CMMC-Applied.txt" -Encoding UTF8 -Force
+Write-Output "Win11Tweaks-CMMC have been applied"
 
 Stop-Transcript
