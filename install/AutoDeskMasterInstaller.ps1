@@ -510,4 +510,5 @@ New-ItemProperty -Path $ShellFolderRegPath -Name 'Local AppData' -Value (Join-Pa
 $JoinedArgumentList = $SetupArguments
 Write-Host "Running`r`n $SetupExePath $JoinedArgumentList"
 
-Start-Process $SetupExePath -ArgumentList $JoinedArgumentList -Wait
+# Wait on Setup.exe only; -Wait also waits on leftover Autodesk processes (e.g. ADPClientService.exe) and never returns
+(Start-Process $SetupExePath -ArgumentList $JoinedArgumentList -PassThru).WaitForExit()
