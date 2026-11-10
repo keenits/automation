@@ -123,6 +123,7 @@ function Set-ProductKey {
 $SoftwareName = $SoftwareName.ToLower()
 
 $ExtractionDestination = "C:\Autodesk"
+$SevenZipFallbackURL = "https://www.7-zip.org/a/7zr.exe" # Used for 2025+ only when 7-Zip is not installed
 mkdir $ExtractionDestination -Force | Out-Null
 
 Write-Host "Finding download URL for $SoftwareName"
@@ -153,7 +154,13 @@ $FirstFileDownloadURL = switch -Exact ($SoftwareName)
     { 'https://efulfillment.autodesk.com/NetSWDLD/2024/ACD/CC46AD7F-5075-3702-B2BF-CFCC5AB8468B/SFX/AutoCAD_2024_English_Win_64bit_dlm_001_002.sfx.exe' 
     }
     "autodesk autocad 2025"
-    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2025/ACD/99E57530-7CC1-31F4-89E9-24175C7690C2/SFX/AutoCAD_2025_English_Win_64bit_db_001_002.exe' 
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2025/ACD/99E57530-7CC1-31F4-89E9-24175C7690C2/SFX/AutoCAD_2025_English_Win_64bit_db_001_002.exe'
+    }
+    "autodesk autocad 2026"
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2026/ACD/E55B46A2-B58D-3ABE-B345-8368D1AB33AA/SFX/ACD_2026_english_us_win_db_001_002.exe'
+    }
+    "autodesk autocad 2027"
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2027/ACD/8658A469-1448-38DD-8981-8BED78BCCF9D/SFX/ACD_2027_english_us_win_db_001_002.exe'
     }
     "autodesk dwg trueview 2022"
     { 'https://efulfillment.autodesk.com/NetSWDLD/2022/ACD/D7A6621A-1A6A-3DAC-BBD2-9EB566035195/SFX/DWGTrueView_2022_English_64bit_dlm.sfx.exe' 
@@ -165,7 +172,13 @@ $FirstFileDownloadURL = switch -Exact ($SoftwareName)
     { 'https://efulfillment.autodesk.com/NetSWDLD/2024/ACD/9C02048D-D0DB-3E06-B903-89BD24380AAD/SFX/DWGTrueView_2024_English_64bit_dlm.sfx.exe' 
     }
     "autodesk dwg trueview 2025"
-    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2025/PLC0000037/A6C769F8-A5A7-3306-9711-0E6F4C045BA2/SFX/DWGTrueView_2025_English_64bit_db_001_002.exe' 
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2025/PLC0000037/A6C769F8-A5A7-3306-9711-0E6F4C045BA2/SFX/DWGTrueView_2025_English_64bit_db_001_002.exe'
+    }
+    "autodesk dwg trueview 2026"
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2026/PLC0000037/C4DAD0F5-FFEB-347F-A10C-AF39031457C9/SFX/DWGTrueView_2026_English_64bit_db_001_002.exe'
+    }
+    "autodesk dwg trueview 2027"
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2027/PLC0000037/045D668C-3014-35D6-A2BE-4C82327A8A3E/SFX/TrueView_2027_english_us_db_001_002.exe'
     }
     'autodesk civil 3d 2018'
     { 'https://efulfillment.autodesk.com/NET18SWDLD/2018/CIV3D/A14CC040-2CDF-4F24-B1D3-28AA7C6FAD8B/SFX/Autodesk_Civil3D_2018_English_R1_Win_64bit_dlm_001_003.sfx.exe' 
@@ -189,7 +202,13 @@ $FirstFileDownloadURL = switch -Exact ($SoftwareName)
     { 'https://efulfillment.autodesk.com/NetSWDLD/2024/CIV3D/3B06A92C-EE4A-3D14-88CF-052164D19B8C/SFX/Autodesk_Civil_3D_2024_English_Win_64bit_dlm_001_003.sfx.exe' 
     }
     "autodesk civil 3d 2025"
-    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2025/CIV3D/3D456298-946E-369A-852A-56ADD40547D0/SFX/CIV3D_2025_English_Win_64bit_db_001_002.exe' 
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2025/CIV3D/3D456298-946E-369A-852A-56ADD40547D0/SFX/CIV3D_2025_English_Win_64bit_db_001_002.exe'
+    }
+    "autodesk civil 3d 2026"
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2026/CIV3D/E81FE5B0-6BD9-3DD6-8B47-B286F77596F3/SFX/CIV3D_2026_English_win_db_001_002.exe'
+    }
+    "autodesk civil 3d 2027"
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2027/CIV3D/01D11119-5E52-3ED3-8B05-87AAED2B0754/SFX/CIV3D_2027_english_us_win_db_001_002.exe'
     }
     'autodesk revit 2017'
     { 'https://efulfillment.autodesk.com/NET17SWDLD/2017/RVT/DLM/Autodesk_Revit_2017_English_Win_64bit_dlm_001_002.sfx.exe' 
@@ -216,7 +235,13 @@ $FirstFileDownloadURL = switch -Exact ($SoftwareName)
     { 'https://efulfillment.autodesk.com/NetSWDLD/2024/RVT/E7F68AA6-4954-3ACE-8543-D2FCC9B0A356/SFX/Revit_2024_G1_Win_64bit_dlm_001_005.sfx.exe' 
     }
     'autodesk revit 2025'
-    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2025/RVT/686CE2A3-7C33-3AD5-806A-75A6E648117F/SFX/Revit_2025_English_Win_64bit_dlm_001_002.exe' 
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2025/RVT/686CE2A3-7C33-3AD5-806A-75A6E648117F/SFX/Revit_2025_English_Win_64bit_dlm_001_002.exe'
+    }
+    'autodesk revit 2026'
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2026/RVT/8986CA21-EA9C-32F3-A1DB-C34BD2BDA7A5/SFX/RVT_2026_NA_win_db_001_002.exe'
+    }
+    'autodesk revit 2027'
+    { 'https://efulfillment.autodesk.com/NetSWDLD/ODIS/prd/2027/RVT/8CA3AC7D-FAD3-34CE-B228-4EE1B50E2D3E/SFX/RVT_2027_NA_win_db_001_002.exe'
     }
 }
     if(!$FirstFileDownloadURL)
@@ -400,8 +425,30 @@ if ($Year -le 2024) {
         Write-Verbose "Found $SetupExePath, skipping extraction"
     }
 } else {
-    # For years greater than 2024, set default extraction path to first installer file
-    $SetupExePath = $InstallerFiles | Select-Object -First 1 -ExpandProperty FullPath
+    # 2025+: extract the .7z payload with 7-Zip, then run Setup.exe from the extracted folder
+    $ArchivePath = $InstallerFiles | Where-Object { $_.FileName -like '*.7z' } | Select-Object -First 1 -ExpandProperty FullPath
+    $ExtractedFolder = Join-Path $ExtractionDestination ([System.IO.Path]::GetFileNameWithoutExtension($ArchivePath) -replace '_\d{3}_\d{3}$', '')
+    $SetupExePath = Join-Path $ExtractedFolder "Setup.exe"
+
+    if (-not (Test-Path -Path $SetupExePath)) {
+        $SevenZipPath = "C:\Program Files\7-Zip\7z.exe"
+        if (-not (Test-Path -Path $SevenZipPath)) {
+            $SevenZipPath = Join-Path $ExtractionDestination "7zr.exe"
+            if (-not (Test-Path -Path $SevenZipPath)) {
+                Download-File -Source $SevenZipFallbackURL -Destination $SevenZipPath
+            }
+        }
+
+        Write-Host "Extracting $ArchivePath to $ExtractedFolder using $SevenZipPath"
+        Start-Process -FilePath $SevenZipPath -ArgumentList "x `"$ArchivePath`" -o`"$ExtractedFolder`" -y" -Wait -NoNewWindow
+
+        if (-not (Test-Path -Path $SetupExePath)) {
+            Write-Warning "Extraction failed, $SetupExePath not found"
+            return
+        }
+    } else {
+        Write-Host "Found $SetupExePath, skipping extraction"
+    }
 }
 
 $SetupArguments = @()
@@ -438,6 +485,11 @@ $SetupArguments += "/t /w /language $Language /c"
 # if ($InstallLevel) {
 #     $SetupArguments += "InstallLevel=$InstallLevel"
 # }
+
+# 2025+ uses the published syntax only: Setup.exe -q
+if ($Year -ge 2025) {
+    $SetupArguments = @("-q")
+}
 
 Write-Host "$SetupArguments"
 
