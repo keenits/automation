@@ -246,8 +246,8 @@ $FirstFileDownloadURL = switch -Exact ($SoftwareName)
 }
     if(!$FirstFileDownloadURL)
     {
-        Write-Warning "Unable to find Download URL for $SoftwareName"
-        return
+        Write-Output "No match found for: $SoftwareName" # Automate checks for this text to catch invalid input
+        exit 1
 }
 
 Write-Host "Found Download URL: $FirstFileDownloadURL"
