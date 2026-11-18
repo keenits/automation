@@ -16,10 +16,10 @@ $ExcludeUsers = @(
     '~*aeadmin*'
     'defaultuser*'
     'WDAGUtilityAccount'
-    'keenadmin'
-    'svc_automate'
-    'administrator'
-    'svc_scan'
+    'keenadmin*'
+    'svc_automate*'
+    'administrator*'
+    'svc_scan*'
 )
 
 function Test-Excluded ($Name) { [bool]($ExcludeUsers | Where-Object { $Name -like $_ }) }
@@ -255,9 +255,16 @@ foreach ($p in $profiles) {
 
     # Unload hive before file copies
     if ($loaded) {
-        [gc]::Collect()
-        Start-Sleep -Seconds 1
-        reg unload "HKU\$sid" | Out-Null
+        # Release registry handles held by script variables, then retry the unload
+        $key = $null; $usf = $null; $fontKey = $null
+        [gc]::Collect(); [gc]::WaitForPendingFinalizers(); [gc]::Collect()
+        $unloaded = $false
+        for ($i = 0; $i -lt 5 -and -not $unloaded; $i++) {
+            Start-Sleep -Seconds 2
+            reg unload "HKU\$sid" 2>$null | Out-Null
+            $unloaded = ($LASTEXITCODE -eq 0)
+        }
+        if (-not $unloaded) { Write-Log "  WARNING: could not unload the registry hive for $user. Reboot this machine before $user signs in on it." }
     }
 
     # Edge / Chrome bookmarks
