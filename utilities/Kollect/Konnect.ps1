@@ -29,10 +29,10 @@ $ExcludeUsers = @(
     '~*aeadmin*'
 	'defaultuser*'
 	'WDAGUtilityAccount'
-	'keenadmin'
-    'svc_automate'
-	'administrator'
-	'svc_scan'
+	'keenadmin*'
+    'svc_automate*'
+	'administrator*'
+	'svc_scan*'
 )
 
 function Test-Excluded ($Name) { [bool]($ExcludeUsers | Where-Object { $Name -like $_ }) }
