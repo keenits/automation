@@ -37,9 +37,10 @@ After the edits, a search for `andrew-s-taylor` should only find the header comm
 | 9 | Before snapshot (`Get-DebloatSnapshot`) for the report | After the safeguard |
 | 10 | Consumer features: `DisableWindowsConsumerFeatures` plus ContentDeliveryManager keys for the default user and loaded users, so removed apps don't return | After the AppX removal, before the `Remove Registry Keys` header |
 | 11 | Extra AppX removal: partial-name match list (Win11Debloat safe defaults plus HP extras), skips whitelisted apps | After block 10 |
-| 12 | Remove Dell Connected Service Delivery (MSI, looked up by display name) | Before the removal report |
+| 12 | Remove Dell Connected Service Delivery (MSI, looked up by display name) | Before upstream's wrap-up (`$stopUtc = [datetime]::UtcNow`), so the reported run time includes it |
 | 13 | Removal report, including manufacturer support links (Dell drivers link built from the service tag, DCU, HP Image Assistant, Lenovo Commercial Vantage) | Before `#Set ProgressPreerence back` at the end |
 | 14 | Delete the working folder, after waiting for the McAfee cleanup tool to exit | After the removal report |
+| 15 | "McAfee not detected, skipping" message when no McAfee was found | After the McAfee section, before `##Look for anything else` |
 
 ## Sections skipped
 

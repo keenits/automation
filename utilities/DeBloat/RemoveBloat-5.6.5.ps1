@@ -4260,6 +4260,12 @@ if ($mcafeeinstalled -eq "true")
 }
 
 
+##LOCAL CHANGE: say so when no McAfee was found
+if ($mcafeeinstalled -ne "true")
+{
+    write-output "McAfee not detected, skipping"
+}
+
 ##Look for anything else
 
 ##Make sure Intune hasn't installed anything so we don't remove installed apps
@@ -4408,6 +4414,18 @@ if ($IsOOBEComplete -eq 0)
 
 }
 
+############################################################################################################
+#                       LOCAL CHANGE: Remove Dell Connected Service Delivery                               #
+############################################################################################################
+##BIOS-driven Dell agent that reinstalls Dell support software; not covered by upstream
+$dcsdEntries = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" |
+    Where-Object { $_.DisplayName -eq 'Dell Connected Service Delivery' -and $_.UninstallString -match 'MsiExec' }
+foreach ($dcsdEntry in $dcsdEntries)
+{
+    write-output "Removing Dell Connected Service Delivery $($dcsdEntry.DisplayVersion)"
+    Start-Process -FilePath msiexec.exe -ArgumentList "/X$($dcsdEntry.PSChildName) /qn /norestart" -Wait
+}
+
 $stopUtc = [datetime]::UtcNow
 
 # Calculate the total run time
@@ -4424,18 +4442,6 @@ if ($runTime.TotalHours -ge 1)
 
 write-output "Completed"
 write-output "Total Script $($runTimeFormatted)"
-
-############################################################################################################
-#                       LOCAL CHANGE: Remove Dell Connected Service Delivery                               #
-############################################################################################################
-##BIOS-driven Dell agent that reinstalls Dell support software; not covered by upstream
-$dcsdEntries = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" |
-    Where-Object { $_.DisplayName -eq 'Dell Connected Service Delivery' -and $_.UninstallString -match 'MsiExec' }
-foreach ($dcsdEntry in $dcsdEntries)
-{
-    write-output "Removing Dell Connected Service Delivery $($dcsdEntry.DisplayVersion)"
-    Start-Process -FilePath msiexec.exe -ArgumentList "/X$($dcsdEntry.PSChildName) /qn /norestart" -Wait
-}
 
 ############################################################################################################
 #                                   LOCAL CHANGE: Removal report                                           #
