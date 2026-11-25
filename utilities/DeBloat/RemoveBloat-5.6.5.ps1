@@ -4426,6 +4426,18 @@ write-output "Completed"
 write-output "Total Script $($runTimeFormatted)"
 
 ############################################################################################################
+#                       LOCAL CHANGE: Remove Dell Connected Service Delivery                               #
+############################################################################################################
+##BIOS-driven Dell agent that reinstalls Dell support software; not covered by upstream
+$dcsdEntries = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" |
+    Where-Object { $_.DisplayName -eq 'Dell Connected Service Delivery' -and $_.UninstallString -match 'MsiExec' }
+foreach ($dcsdEntry in $dcsdEntries)
+{
+    write-output "Removing Dell Connected Service Delivery $($dcsdEntry.DisplayVersion)"
+    Start-Process -FilePath msiexec.exe -ArgumentList "/X$($dcsdEntry.PSChildName) /qn /norestart" -Wait
+}
+
+############################################################################################################
 #                                   LOCAL CHANGE: Removal report                                           #
 ############################################################################################################
 $snapAfter = Get-DebloatSnapshot
@@ -4458,24 +4470,61 @@ function Get-ReportSection
 
 $reportCs = Get-CimInstance Win32_ComputerSystem
 $reportOs = Get-CimInstance Win32_OperatingSystem
+$reportSerial = (Get-CimInstance Win32_BIOS).SerialNumber
 $summary = [pscustomobject][ordered]@{
     'Computer'                  = $reportCs.Name
     'Manufacturer'              = $reportCs.Manufacturer
     'Model'                     = $reportCs.Model
-    'Serial number'             = (Get-CimInstance Win32_BIOS).SerialNumber
+    'Serial number'             = $reportSerial
     'Windows'                   = "$($reportOs.Caption) ($($reportOs.Version))"
     'OOBE complete'             = $(if ($IsOOBEComplete -ne 0) { 'Yes' } else { 'No' })
     'Started'                   = $reportStart
     'Finished'                  = $reportEnd
-    'Duration'                  = $runTimeFormatted
+    'Run time'                  = $runTimeFormatted -replace '^Duration: ', ''
     'AppX removed'              = @($removedAppx | Where-Object { $_ }).Count
     'Provisioned removed'       = @($removedProvisioned | Where-Object { $_ }).Count
     'Win32 removed'             = @($removedWin32 | Where-Object { $_ }).Count
 }
 
+##Manufacturer support links
+switch -Regex ($reportCs.Manufacturer)
+{
+    'Dell'
+    {
+        $supportLinks = [ordered]@{
+            'Drivers and downloads for this device' = "https://www.dell.com/support/home/en-us/product-support/servicetag/$reportSerial/drivers"
+            'Dell Command | Update'                 = 'https://www.dell.com/support/kbdoc/000177325'
+        }
+    }
+    '^HP|Hewlett'
+    {
+        $supportLinks = [ordered]@{
+            'Drivers and downloads (enter the serial number)' = 'https://support.hp.com/us-en/drivers'
+            'HP Image Assistant'                              = 'http://hp.com/go/clientmanagement'
+        }
+    }
+    'Lenovo'
+    {
+        $supportLinks = [ordered]@{
+            'Drivers and downloads (enter the serial number)' = 'https://pcsupport.lenovo.com'
+            'Lenovo Commercial Vantage'                       = 'https://www.lenovo.com/us/en/software/commercialvantage/'
+        }
+    }
+    default { $supportLinks = $null }
+}
+$supportHtml = "<h2>Manufacturer support</h2><p>Serial number: <b>$reportSerial</b></p>"
+if ($supportLinks)
+{
+    $supportHtml += "<ul>" + (($supportLinks.GetEnumerator() | ForEach-Object { "<li><a href='$($_.Value)'>$($_.Key)</a></li>" }) -join '') + "</ul>"
+} else
+{
+    $supportHtml += "<p>No support links for this manufacturer.</p>"
+}
+
 $reportStyle = "<style>body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#222}h1{font-size:22px}h2{font-size:17px;margin-top:28px;border-bottom:1px solid #ccc;padding-bottom:4px}table{border-collapse:collapse;font-size:13px}th,td{border:1px solid #ddd;padding:4px 10px;text-align:left;vertical-align:top}th{background:#f2f2f2}.note{color:#666;font-size:12px}</style>"
 $reportBody = "<h1>Debloat report: $($reportCs.Name)</h1>"
 $reportBody += ($summary | ConvertTo-Html -Fragment -As List | Out-String)
+$reportBody += $supportHtml
 $reportBody += Get-ReportSection 'Removed AppX apps' $removedAppx
 $reportBody += Get-ReportSection 'Removed provisioned packages' $removedProvisioned 'Provisioned packages are what new user profiles receive.'
 $reportBody += Get-ReportSection 'Removed Win32 apps' $removedWin32
@@ -4484,8 +4533,16 @@ $reportBody += Get-ReportSection 'Kept by whitelist (AppX)' $keptAppx
 $reportBody += Get-ReportSection 'Kept by whitelist (Win32)' $keptWin32
 $reportBody += Get-ReportSection "Remaining manufacturer software (review)" $remainingOem "Win32 entries whose publisher matches '$manufacturerKey'. Includes drivers and tools that are meant to stay; use it to spot anything that should have been removed."
 
-ConvertTo-Html -Title "Debloat report - $($reportCs.Name)" -Head $reportStyle -Body $reportBody | Out-File "C:\ProgramData\Automation\Logs\DebloatReport.html" -Encoding utf8
+"<!DOCTYPE html><html><head><meta charset='utf-8'><title>Debloat report - $($reportCs.Name)</title>$reportStyle</head><body>$reportBody</body></html>" | Out-File "C:\ProgramData\Automation\Logs\DebloatReport.html" -Encoding utf8
 write-output "Removal report written to C:\ProgramData\Automation\Logs\DebloatReport.html"
+
+############################################################################################################
+#                            LOCAL CHANGE: Remove the working folder                                       #
+############################################################################################################
+##Upstream starts the McAfee cleanup tool without waiting, so let it finish before deleting its files
+Get-Process -Name mccleanup -ErrorAction SilentlyContinue | Wait-Process -Timeout 900
+Remove-Item -Path "C:\ProgramData\Automation\Debloat" -Recurse -Force
+write-output "Removed working folder C:\ProgramData\Automation\Debloat"
 
 #Set ProgressPreerence back
 $ProgressPreference = $OrginalProgressPreference

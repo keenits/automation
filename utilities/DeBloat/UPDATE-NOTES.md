@@ -7,11 +7,11 @@ Upstream original SHA256: `4500fe5538471cc2df8d0fde5ad23bfef037561e095f27a3e341e
 ## Deployment
 
 - ImmyBot runs it with `Invoke-Expression` from the raw GitHub URL, onboarding only.
-- Log: `C:\ProgramData\Automation\Logs\Debloat.log`
+- Log: `C:\ProgramData\Automation\Logs\Debloat.log`. Under Immy this transcript stays empty, because Immy captures output through its own host; the full output is in the Immy session log.
 - Report: `C:\ProgramData\Automation\Logs\DebloatReport.html`
-- Working files: `C:\ProgramData\Automation\Debloat`
+- Working files: `C:\ProgramData\Automation\Debloat` (deleted at the end of the run)
 - Dependencies: `utilities/DeBloat/` in this repo (`start2.bin`, `HPConnOpt.iss`, `mcafeeclean.zip`, `mccleanup.zip`). `start2.bin` is not used (Start menu section skipped) but its URL is kept consistent.
-- Immy test: passes when the log contains a line starting with `Completed`. A skipped run (in-use machine) writes `Skipped` instead, so Immy reports it as failed on purpose.
+- Immy test: passes when `DebloatReport.html` exists. The report is written last, so a skipped run (in-use machine) or a partial run leaves no report and Immy reports it as failed on purpose.
 
 ## Edits to upstream code
 
@@ -37,7 +37,9 @@ After the edits, a search for `andrew-s-taylor` should only find the header comm
 | 9 | Before snapshot (`Get-DebloatSnapshot`) for the report | After the safeguard |
 | 10 | Consumer features: `DisableWindowsConsumerFeatures` plus ContentDeliveryManager keys for the default user and loaded users, so removed apps don't return | After the AppX removal, before the `Remove Registry Keys` header |
 | 11 | Extra AppX removal: partial-name match list (Win11Debloat safe defaults plus HP extras), skips whitelisted apps | After block 10 |
-| 12 | Removal report | Before `#Set ProgressPreerence back` at the end |
+| 12 | Remove Dell Connected Service Delivery (MSI, looked up by display name) | Before the removal report |
+| 13 | Removal report, including manufacturer support links (Dell drivers link built from the service tag, DCU, HP Image Assistant, Lenovo Commercial Vantage) | Before `#Set ProgressPreerence back` at the end |
+| 14 | Delete the working folder, after waiting for the McAfee cleanup tool to exit | After the removal report |
 
 ## Sections skipped
 
@@ -54,9 +56,16 @@ The OneDrive Photos app removal between the two parts still runs. Before wrappin
 
 - Keep: Media Player, Quick Assist, Phone Link, Power Automate Desktop, Remote Desktop, new Outlook, Clipchamp, Copilot, Widgets.
 - Dell, HP, Lenovo, Samsung, Acer and Asus sections: upstream behavior. Dell Display Manager, Peripheral Manager and Pair are whitelisted upstream but still removed by its manual blocks; accepted.
-- Dell Optimizer 6.x (MSI) is not removed by upstream; not pursued.
+- Dell Optimizer 6.x is removed by upstream (confirmed on a Dell 15 D15260 test run).
+- Dell Connected Service Delivery is removed by our block. Dell describes it as a BIOS-level feature that reinstalls support software, so it may come back; the BIOS side is not handled yet.
+- Dell Command | Update stays removed until the team decides on OEM update tools.
 - McAfee removal kept; the zips are Andrew Taylor's repackaged McAfee tools, hosted in this repo.
 - Not carried over from the old `RemoveBloat2.ps1`: nothing. Its wildcard bloat entries never matched; the extra AppX list replaces them.
+
+## Open items
+
+- Check whether Dell Connected Service Delivery or SupportAssist components return after reboots; decide on the BIOS-level setting.
+- Team decision on OEM update tools (DCU, HP Image Assistant, Commercial Vantage) versus Windows Update drivers.
 
 ## Long-term items (settings script)
 
